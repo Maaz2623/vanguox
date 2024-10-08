@@ -1,7 +1,7 @@
 "use client";
 import { cn } from "@/lib/utils";
 import React, { useState } from "react";
-import { SettingsIcon, UserIcon, CodesandboxIcon } from "lucide-react";
+import { AppleIcon, SettingsIcon, UserIcon } from "lucide-react";
 
 const Dock = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -19,7 +19,7 @@ const Dock = () => {
         )}
       >
         <div className="p-1.5 rounded-md bg-transparent hover:bg-white/10 cursor-pointer transition-all">
-          <CodesandboxIcon
+          <AppleIcon
             size={35}
             className="hover:scale-110 transition-all "
           />
