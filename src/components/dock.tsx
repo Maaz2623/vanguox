@@ -2,9 +2,12 @@
 import { cn } from "@/lib/utils";
 import React, { useState } from "react";
 import { AppleIcon, SettingsIcon, UserIcon } from "lucide-react";
+import { useSettingsModalStore } from "@/vanguox-apps/settings/store/use-settings-modal-store";
 
 const Dock = () => {
   const [isVisible, setIsVisible] = useState(false);
+
+  const [, setOpen] = useSettingsModalStore();
 
   return (
     <div
@@ -19,16 +22,16 @@ const Dock = () => {
         )}
       >
         <div className="p-1.5 rounded-md bg-transparent hover:bg-white/10 cursor-pointer transition-all">
-          <AppleIcon
-            size={35}
-            className="hover:scale-110 transition-all "
-          />
+          <AppleIcon size={30} className="hover:scale-110 transition-all " />
+        </div>
+        <div
+          onClick={() => setOpen(true)}
+          className="p-1.5 rounded-md bg-transparent hover:bg-white/10 cursor-pointer transition-all"
+        >
+          <SettingsIcon size={30} className="hover:scale-110 transition-all " />
         </div>
         <div className="p-1.5 rounded-md bg-transparent hover:bg-white/10 cursor-pointer transition-all">
-          <SettingsIcon size={35} className="hover:scale-110 transition-all " />
-        </div>
-        <div className="p-1.5 rounded-md bg-transparent hover:bg-white/10 cursor-pointer transition-all">
-          <UserIcon size={35} className="hover:scale-110 transition-all " />
+          <UserIcon size={30} className="hover:scale-110 transition-all " />
         </div>
       </div>
     </div>

@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Dock from "@/components/dock";
 import { ThemeProvider } from "@/components/theme-provider";
+import { JotaiProvider } from "@/components/jotai-provider";
+import Modals from "@/components/modals";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -49,10 +51,13 @@ export default function RootLayout({
           }}
         />
         <ThemeProvider attribute="class" defaultTheme="dark">
-          <main className="h-full w-full relative p-5 overflow-hidden">
-            <Dock />
-            {children}
-          </main>
+          <JotaiProvider>
+            <Modals />
+            <main className="h-full w-full relative p-5 overflow-hidden">
+              <Dock />
+              {children}
+            </main>
+          </JotaiProvider>
         </ThemeProvider>
       </body>
     </html>
