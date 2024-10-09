@@ -2,12 +2,13 @@
 import { cn } from "@/lib/utils";
 import React, { useState } from "react";
 import { AppleIcon, SettingsIcon, UserIcon } from "lucide-react";
-import { useSettingsModalStore } from "@/vanguox-apps/settings/store/use-settings-modal-store";
+import { useSettingsModalStore } from "@/app/settings/_store/use-settings-modal-store";
+import { useRouter } from "next/navigation";
 
 const Dock = () => {
   const [isVisible, setIsVisible] = useState(false);
 
-  const [, setOpen] = useSettingsModalStore();
+  const router = useRouter()
 
   return (
     <div
@@ -25,7 +26,7 @@ const Dock = () => {
           <AppleIcon size={30} className="hover:scale-110 transition-all " />
         </div>
         <div
-          onClick={() => setOpen(true)}
+          onClick={() => router.push('/settings')}
           className="p-1.5 rounded-md bg-transparent hover:bg-white/10 cursor-pointer transition-all"
         >
           <SettingsIcon size={30} className="hover:scale-110 transition-all " />

@@ -1,5 +1,5 @@
 "use client";
-import SettingsModal from "@/vanguox-apps/settings/components/settings.modal";
+import SettingsModal from "@/app/settings/_components/settings.modal";
 import React, { useEffect, useState } from "react";
 
 const Modals = () => {
