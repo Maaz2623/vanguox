@@ -1,6 +1,6 @@
 use std::{env, str::FromStr};
 use serde::Deserialize;
-use actix_web::{get, middleware::Logger, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, http, middleware::Logger, post, web, App, HttpResponse, HttpServer, Responder};
 use deadpool_postgres::{Manager, Pool};
 use dotenv::dotenv;
 use openssl::ssl::{SslConnector, SslMethod};
@@ -120,7 +120,8 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
-            .wrap(Cors::default().allow_any_origin())
+            .wrap(Cors::default().allow_any_origin().allowed_methods(vec!["GET", "POST"])
+            .allowed_headers(vec![http::header::CONTENT_TYPE]))
             .app_data(web::Data::new(pool.clone()))
             .service(hello)
             .service(echo)
