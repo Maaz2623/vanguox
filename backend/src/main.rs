@@ -1,6 +1,9 @@
+mod routes;
+
+use routes::users::{get_all_users, get_user_by_id, delete_user_by_id};
+
 use std::{env, str::FromStr};
-use serde::Deserialize;
-use actix_web::{get, http, middleware::Logger, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{http, middleware::Logger, web, App, HttpServer};
 use deadpool_postgres::{Manager, Pool};
 use dotenv::dotenv;
 use openssl::ssl::{SslConnector, SslMethod};
@@ -8,67 +11,7 @@ use postgres_openssl::MakeTlsConnector;
 use std::error::Error;
 use actix_cors::Cors;
 
-#[get("/")]
-async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello world!")
-}
 
-#[post("/echo")]
-async fn echo(req_body: String) -> impl Responder {
-    HttpResponse::Ok().body(req_body)
-}
-
-
-#[derive(Deserialize)]
-struct NewRecord {
-    name: String,
-    email: String,
-}
-
-#[post("/insert")]
-async fn insert_record(pool: web::Data<Pool>, new_record: web::Json<NewRecord>) -> impl Responder {
-    let client = pool.get().await.unwrap();
-
-    // SQL query to insert new record
-    let insert_query = "
-        INSERT INTO test_table (name, email)
-        VALUES ($1, $2)
-        RETURNING id;
-    ";
-
-    // Execute the insert query
-    match client
-        .query_one(insert_query, &[&new_record.name, &new_record.email])
-        .await
-    {
-        Ok(row) => {
-            let id: i32 = row.get(0);
-            HttpResponse::Ok().body(format!("Record inserted with ID: {}", id))
-        }
-        Err(e) => {
-            eprintln!("Error inserting record: {}", e);
-            HttpResponse::InternalServerError().body("Failed to insert record")
-        }
-    }
-}
-
-#[get("/db-query")]
-async fn db_query(pool: web::Data<Pool>) -> HttpResponse {
-    let client = pool.get().await.unwrap();
-    let rows = client.query("SELECT * FROM test_table", &[]).await.unwrap();
-    let result = rows.iter().map(|row| {
-        let id: i32 = row.get(0);      // Column 0 is `id`, which is an integer
-        let name: String = row.get(1); // Column 1 is `name`, which is a string
-        let email: String = row.get(2); // Column 2 is `email`, which is a string
-        format!("id: {}, name: {}, email: {}", id, name, email)
-    }).collect::<Vec<String>>().join(", ");
-    HttpResponse::Ok().body(format!("Rows: {}", result))
-}
-
-
-async fn manual_hello() -> impl Responder {
-    HttpResponse::Ok().body("Hey there!")
-}
 
 async fn create_pool() -> Result<Pool, Box<dyn Error>> {
     dotenv::dotenv().ok(); // Load environment variables from .env file
@@ -103,7 +46,7 @@ async fn main() -> std::io::Result<()> {
     let client = pool.get().await.unwrap();
 
     let create_table_query = "
-        CREATE TABLE IF NOT EXISTS test_table (
+        CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
             name VARCHAR NOT NULL,
             email VARCHAR NOT NULL
@@ -123,11 +66,9 @@ async fn main() -> std::io::Result<()> {
             .wrap(Cors::default().allow_any_origin().allowed_methods(vec!["GET", "POST"])
             .allowed_headers(vec![http::header::CONTENT_TYPE]))
             .app_data(web::Data::new(pool.clone()))
-            .service(hello)
-            .service(echo)
-            .service(db_query)
-            .service(insert_record)
-            .route("/hey", web::get().to(manual_hello))
+            .service(get_all_users)
+            .service(get_user_by_id)
+            .service(delete_user_by_id)
     })
     .bind(("127.0.0.1", 8080))?
     .run()

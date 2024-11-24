@@ -278,6 +278,7 @@ dependencies = [
  "deadpool 0.10.0",
  "deadpool-postgres",
  "dotenv",
+ "log",
  "openssl",
  "postgres",
  "postgres-openssl",
