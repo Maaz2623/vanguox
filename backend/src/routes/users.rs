@@ -1,12 +1,13 @@
-use actix_web::{delete, get, web, HttpResponse, Result};
+use actix_web::{delete, get, post, web, HttpResponse, Result};
 use deadpool_postgres::Pool;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use tokio_postgres::Error as PgError;
 use log::{error, info};
+use uuid::Uuid;
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct User {
-    id: i32,
+    id: Uuid,
     name: String,
     email: String,
 }
@@ -16,6 +17,34 @@ fn handle_db_error(e: PgError) -> actix_web::Error {
     error!("Database error: {}", e);
     actix_web::error::ErrorInternalServerError("Internal Server Error")
 }
+
+#[post("/users")]
+pub async fn create_new_user(pool: web::Data<Pool>, new_user: web::Json<User>) -> Result<HttpResponse> {
+    let client = pool.get().await.map_err(|e| {
+        error!("Failed to acquire DB connection: {}", e);
+        actix_web::error::ErrorInternalServerError("Internal Server Error")
+    })?;
+
+    // Insert the new user into the database
+    let stmt = "INSERT INTO users (name, email) VALUES ($1, $2) RETURNING id";
+    let row = client.query_one(stmt, &[&new_user.name, &new_user.email])
+        .await
+        .map_err(handle_db_error)?;
+
+    let user_id: Uuid = row.get(0);  // Extract the generated UUID
+
+    // Return a successful response with the created user data
+    let created_user = User {
+        id: user_id,
+        name: new_user.name.clone(),
+        email: new_user.email.clone(),
+    };
+
+    info!("Created new user with id {}", user_id);
+
+    Ok(HttpResponse::Created().json(created_user))
+}
+
 
 // Handler to get all users
 #[get("/users")]
@@ -30,7 +59,7 @@ pub async fn get_all_users(pool: web::Data<Pool>) -> Result<HttpResponse> {
         .map_err(handle_db_error)?;
 
     let result: Vec<User> = rows.iter().map(|row| User {
-        id: row.get(0),
+        id: row.get(0),  // UUID is directly mapped
         name: row.get(1),
         email: row.get(2),
     }).collect();
@@ -40,8 +69,8 @@ pub async fn get_all_users(pool: web::Data<Pool>) -> Result<HttpResponse> {
 
 // Handler to get a user by id
 #[get("/users/{id}")]
-pub async fn get_user_by_id(pool: web::Data<Pool>, path: web::Path<i32>) -> Result<HttpResponse> {
-    let id = path.into_inner();
+pub async fn get_user_by_id(pool: web::Data<Pool>, path: web::Path<Uuid>) -> Result<HttpResponse> {
+    let id = path.to_string();
     let client = pool.get().await.map_err(|e| {
         error!("Failed to acquire DB connection: {}", e);
         actix_web::error::ErrorInternalServerError("Internal Server Error")
@@ -51,8 +80,10 @@ pub async fn get_user_by_id(pool: web::Data<Pool>, path: web::Path<i32>) -> Resu
         .await
         .map_err(handle_db_error)?;
 
+    let formatted_id = row.get(0);
+
     let user = User {
-        id: row.get(0),
+        id: formatted_id,
         name: row.get(1),
         email: row.get(2),
     };
@@ -62,8 +93,8 @@ pub async fn get_user_by_id(pool: web::Data<Pool>, path: web::Path<i32>) -> Resu
 
 // Handler to delete a user by id
 #[delete("/users/{id}/delete")]
-pub async fn delete_user_by_id(pool: web::Data<Pool>, path: web::Path<i32>) -> Result<HttpResponse> {
-    let id = path.into_inner();
+pub async fn delete_user_by_id(pool: web::Data<Pool>, path: web::Path<Uuid>) -> Result<HttpResponse> {
+    let id = path.to_string();
     let client = pool.get().await.map_err(|e| {
         error!("Failed to acquire DB connection: {}", e);
         actix_web::error::ErrorInternalServerError("Internal Server Error")

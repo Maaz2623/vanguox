@@ -8,11 +8,12 @@ actix-web = "4"
 actix-cors = "0.7.0"
 deadpool = "0.10"
 deadpool-postgres = "0.10"
-tokio-postgres = "0.7.12"
+tokio-postgres = { version = "0.7.12"}
 openssl = "0.10"
 postgres-openssl = "0.5.0"
 postgres = "0.19"
 dotenv = "0.15"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-log = "0.4"  # Add this line
+log = "0.4"
+uuid = { version = "1.0", features = ["serde"] }
