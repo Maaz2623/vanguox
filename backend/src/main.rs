@@ -55,8 +55,12 @@ async fn insert_record(pool: web::Data<Pool>, new_record: web::Json<NewRecord>) 
 async fn db_query(pool: web::Data<Pool>) -> HttpResponse {
     let client = pool.get().await.unwrap();
     let rows = client.query("SELECT * FROM test_table", &[]).await.unwrap();
-    let result = rows.iter().map(|row| row.get::<usize, String>(0)).collect::<Vec<String>>().join(", ");
-
+    let result = rows.iter().map(|row| {
+        let id: i32 = row.get(0);      // Column 0 is `id`, which is an integer
+        let name: String = row.get(1); // Column 1 is `name`, which is a string
+        let email: String = row.get(2); // Column 2 is `email`, which is a string
+        format!("id: {}, name: {}, email: {}", id, name, email)
+    }).collect::<Vec<String>>().join(", ");
     HttpResponse::Ok().body(format!("Rows: {}", result))
 }
 
