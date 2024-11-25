@@ -1,11 +1,14 @@
 mod routes;
+mod models;
+mod handlers;
+mod db;
 
-use routes::users::{get_all_users, get_user_by_id, delete_user_by_id};
 
 use std::{env, str::FromStr};
 use actix_web::{http, middleware::Logger, web, App, HttpServer};
 use deadpool_postgres::{Manager, Pool};
 use dotenv::dotenv;
+use handlers::user_handlers::{delete_user_by_id, get_all_users, get_user_by_id};
 use openssl::ssl::{SslConnector, SslMethod};
 use postgres_openssl::MakeTlsConnector;
 use std::error::Error;
@@ -39,6 +42,8 @@ async fn create_pool() -> Result<Pool, Box<dyn Error>> {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
 
+    env_logger::init();
+
     dotenv().ok();
 
     let pool = create_pool().await.unwrap();
@@ -47,7 +52,7 @@ async fn main() -> std::io::Result<()> {
 
     let create_table_query = "
         CREATE TABLE IF NOT EXISTS users (
-            id SERIAL PRIMARY KEY,
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             name VARCHAR NOT NULL,
             email VARCHAR NOT NULL
         );
@@ -59,10 +64,12 @@ async fn main() -> std::io::Result<()> {
         Err(e) => eprintln!("Error creating table: {}", e),
     }
 
+    let log_format = "%a \"%r\" %s %b \"%{Referer}i\" \"%{User-Agent}i\""; 
+
 
     HttpServer::new(move || {
         App::new()
-            .wrap(Logger::default())
+            .wrap(Logger::new(log_format))
             .wrap(Cors::default().allow_any_origin().allowed_methods(vec!["GET", "POST"])
             .allowed_headers(vec![http::header::CONTENT_TYPE]))
             .app_data(web::Data::new(pool.clone()))
