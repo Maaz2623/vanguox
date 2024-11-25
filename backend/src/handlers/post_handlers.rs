@@ -1,9 +1,10 @@
-use actix_web::{delete, get, post, web, HttpResponse, Result};
+use actix_web::{get, post, web, HttpResponse, Result};
 use deadpool_postgres::Pool;
-use log::{error, info};
+use log::error;
 use uuid::Uuid;
 
-use crate::{db::index::handle_db_error, models::{post_models::{NewPost, Post}, user_models::{NewUser, User}}};
+use crate::models::post_models::{NewPost, Post};
+
 
 #[post("/posts")]
 pub async fn create_post(pool: web::Data<Pool>, new_post: web::Json<NewPost>) -> Result<HttpResponse> {
