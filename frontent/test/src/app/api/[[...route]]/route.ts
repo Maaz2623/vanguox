@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { StatusCode } from "hono/utils/http-status";
 import { handle } from "hono/vercel";
 
 export const runtime = "edge";
@@ -27,8 +28,14 @@ app.post("/insert-user", async (c) => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, email }),
   });
-  const data = await response.text();
-  return c.json(data);
+
+  // Get the response status code
+
+  // Get the response body, which is typically JSON
+  const data = await response.json();
+
+  // Return the same status code and body from the Actix backend to the Hono frontend
+  return c.json(data, response.status as StatusCode);
 });
 
 export const GET = handle(app);

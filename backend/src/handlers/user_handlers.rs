@@ -8,10 +8,19 @@ use crate::{db::index::handle_db_error, models::user_models::{NewUser, User}};
 
 #[post("/users")]
 pub async fn create_new_user(pool: web::Data<Pool>, new_user: web::Json<NewUser>) -> Result<HttpResponse> {
+
+
     let client = pool.get().await.map_err(|e| {
         error!("Failed to acquire DB connection: {}", e);
         actix_web::error::ErrorInternalServerError("Internal Server Error")
     })?;
+
+    let existing_user = client.query_opt("SELECT id FROM users WHERE email = $1", &[&new_user.email]).await.map_err(handle_db_error)?;
+
+    if existing_user.is_some() {
+        return Ok(HttpResponse::Conflict().json(format!("User with email {} already exists", &new_user.email)));
+    }
+
 
     let stmt = "INSERT INTO users (name, email) VALUES ($1, $2) RETURNING id";
     let row = client.query_one(stmt, &[&new_user.name, &new_user.email])
@@ -38,6 +47,8 @@ pub async fn get_all_users(pool: web::Data<Pool>) -> Result<HttpResponse> {
         actix_web::error::ErrorInternalServerError("Internal Server Error")
     })?;
 
+
+
     let rows = client.query("SELECT id, name, email FROM users", &[])
         .await
         .map_err(handle_db_error)?;
@@ -61,18 +72,23 @@ pub async fn get_user_by_id(pool: web::Data<Pool>, path: web::Path<Uuid>) -> Res
         actix_web::error::ErrorInternalServerError("Internal Server Error")
     })?;
 
-    let row = client.query_one("SELECT id, name, email FROM users WHERE id = $1", &[&id])
+    let row = client.query_opt("SELECT id, name, email FROM users WHERE id = $1", &[&id])
         .await
         .map_err(handle_db_error)?;
 
-
-    let user = User {
-        id: row.get(0),
-        name: row.get(1),
-        email: row.get(2),
-    };
-
-    Ok(HttpResponse::Ok().json(user))
+    match row {
+        Some(row) => {
+            let user = User  {
+                id: row.get(0),
+                name: row.get(1),
+                email: row.get(2)
+            };
+            Ok(HttpResponse::Ok().json(user))
+        }
+        None => {
+            Ok(HttpResponse::NotFound().json("User not found."))
+        }
+    }
 }
 
 
