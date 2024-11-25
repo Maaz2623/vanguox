@@ -13,8 +13,6 @@ const HomePage = () => {
         name,
         email,
       });
-      setName("");
-      setEmail("");
     } catch (error) {
       console.log(error);
     }

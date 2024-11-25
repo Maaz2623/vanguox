@@ -7,3 +7,9 @@ pub struct User {
     pub name: String,
     pub email: String,
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct NewUser {
+    pub name: String,
+    pub email: String
+}

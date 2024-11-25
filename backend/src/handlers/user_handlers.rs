@@ -3,11 +3,11 @@ use deadpool_postgres::Pool;
 use log::{error, info};
 use uuid::Uuid;
 
-use crate::{db::index::handle_db_error, models::user_models::User};
+use crate::{db::index::handle_db_error, models::user_models::{NewUser, User}};
 
 
 #[post("/users")]
-pub async fn create_new_user(pool: web::Data<Pool>, new_user: web::Json<User>) -> Result<HttpResponse> {
+pub async fn create_new_user(pool: web::Data<Pool>, new_user: web::Json<NewUser>) -> Result<HttpResponse> {
     let client = pool.get().await.map_err(|e| {
         error!("Failed to acquire DB connection: {}", e);
         actix_web::error::ErrorInternalServerError("Internal Server Error")
@@ -20,8 +20,7 @@ pub async fn create_new_user(pool: web::Data<Pool>, new_user: web::Json<User>) -
 
     let user_id: Uuid = row.get(0);
 
-    let created_user = User {
-        id: user_id,
+    let created_user = NewUser {
         name: new_user.name.clone(),
         email: new_user.email.clone(),
     };

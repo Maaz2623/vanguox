@@ -22,7 +22,7 @@ app.get("/fetch-from-actix", async (c) => {
 
 app.post("/insert-user", async (c) => {
   const { name, email } = await c.req.json();
-  const response = await fetch("http://localhost:8080/insert", {
+  const response = await fetch("http://localhost:8080/users", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, email }),

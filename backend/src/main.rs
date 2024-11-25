@@ -1,4 +1,3 @@
-mod routes;
 mod models;
 mod handlers;
 mod db;
@@ -8,7 +7,7 @@ use std::{env, str::FromStr};
 use actix_web::{http, middleware::Logger, web, App, HttpServer};
 use deadpool_postgres::{Manager, Pool};
 use dotenv::dotenv;
-use handlers::user_handlers::{delete_user_by_id, get_all_users, get_user_by_id};
+use handlers::user_handlers::{create_new_user, delete_user_by_id, get_all_users, get_user_by_id};
 use openssl::ssl::{SslConnector, SslMethod};
 use postgres_openssl::MakeTlsConnector;
 use std::error::Error;
@@ -73,6 +72,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(Cors::default().allow_any_origin().allowed_methods(vec!["GET", "POST"])
             .allowed_headers(vec![http::header::CONTENT_TYPE]))
             .app_data(web::Data::new(pool.clone()))
+            .service(create_new_user)
             .service(get_all_users)
             .service(get_user_by_id)
             .service(delete_user_by_id)
