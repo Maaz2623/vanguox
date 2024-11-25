@@ -7,7 +7,7 @@ use std::{env, str::FromStr};
 use actix_web::{http, middleware::Logger, web, App, HttpServer};
 use deadpool_postgres::{Manager, Pool};
 use dotenv::dotenv;
-use handlers::user_handlers::{create_new_user, delete_user_by_id, get_all_users, get_user_by_id};
+use handlers::{post_handlers::{create_post, get_all_posts}, user_handlers::{create_new_user, delete_user_by_id, get_all_users, get_user_by_id}};
 use openssl::ssl::{SslConnector, SslMethod};
 use postgres_openssl::MakeTlsConnector;
 use std::error::Error;
@@ -47,22 +47,6 @@ async fn main() -> std::io::Result<()> {
 
     let pool = create_pool().await.unwrap();
 
-    let client = pool.get().await.unwrap();
-
-    let create_table_query = "
-        CREATE TABLE IF NOT EXISTS users (
-            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-            name VARCHAR NOT NULL,
-            email VARCHAR NOT NULL
-        );
-    ";
-
-    // Execute the query to create the table
-    match client.execute(create_table_query, &[]).await {
-        Ok(_) => println!("Table created successfully"),
-        Err(e) => eprintln!("Error creating table: {}", e),
-    }
-
     let log_format = "%a \"%r\" %s %b \"%{Referer}i\" \"%{User-Agent}i\""; 
 
 
@@ -76,6 +60,8 @@ async fn main() -> std::io::Result<()> {
             .service(get_all_users)
             .service(get_user_by_id)
             .service(delete_user_by_id)
+            .service(create_post)
+            .service(get_all_posts)
     })
     .bind(("127.0.0.1", 8080))?
     .run()
