@@ -6,6 +6,8 @@ const HomePage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
+  const [data, setData] = useState([]);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     try {
       e.preventDefault();
@@ -13,6 +15,9 @@ const HomePage = () => {
         name,
         email,
       });
+      const response = await axios.get("http://localhost:3000/api/posts");
+      setData(response.data);
+      console.log(data);
     } catch (error) {
       console.log(error);
     }
@@ -40,6 +45,10 @@ const HomePage = () => {
         </div>
         <button className="bg-green-500 p-2">Submit</button>
       </form>
+      <div>
+        <h1>Data</h1>
+        <div>{data}</div>
+      </div>
     </div>
   );
 };

@@ -15,10 +15,10 @@ app.get("/hello", (c) => {
   });
 });
 
-app.get("/fetch-from-actix", async (c) => {
-  const response = await fetch("http://localhost:8080/db-query");
+app.get("/posts", async (c) => {
+  const response = await fetch("http://localhost:8080/posts");
   const data = await response.text();
-  return c.text(data);
+  return c.json(data);
 });
 
 app.post("/insert-user", async (c) => {
