@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Vanguox",
-  description: "An Independent Platform",
+  description: "An Independent Platform ",
 };
 
 export default function RootLayout({
