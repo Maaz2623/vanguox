@@ -4,7 +4,7 @@ import { db } from "./db";
 import dotenv from "dotenv";
 
 dotenv.config({
-  path: "../.env.local",
+  path: ".env.local",
 });
 
 export const auth = betterAuth({
