@@ -12,6 +12,8 @@ export const Navbar = () => {
         alt="logo"
         className=""
       />
+
+      
       <div />
 
       <div>
