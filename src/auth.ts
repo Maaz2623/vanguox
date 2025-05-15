@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db";
 import dotenv from "dotenv";
+import * as schema from "./db/schema";
 
 dotenv.config({
   path: ".env.local",
@@ -16,5 +17,8 @@ export const auth = betterAuth({
   },
   database: drizzleAdapter(db, {
     provider: "pg",
+    schema: {
+      ...schema,
+    },
   }),
 });
