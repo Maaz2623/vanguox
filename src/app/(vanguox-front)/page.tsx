@@ -1,7 +1,10 @@
+import { caller } from "@/trpc/server";
 import React from "react";
 
-const VanguoxFrontPage = () => {
-  return <div>Vanguox Front Page</div>;
+const VanguoxFrontPage = async () => {
+  const data = await caller.users.getUserData();
+
+  return <div>Vanguox Front Page {JSON.stringify(data)}</div>;
 };
 
 export default VanguoxFrontPage;
