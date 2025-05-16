@@ -12,13 +12,7 @@ export const createTRPCContext = cache(async () => {
     headers: await headers(),
   });
 
-  if (!session) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-    });
-  }
-
-  const userId = session.user.id;
+  const userId = session?.user.id;
 
   /**
    * @see: https://trpc.io/docs/server/context
