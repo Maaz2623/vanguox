@@ -1,6 +1,8 @@
 import Image from "next/image";
 import React from "react";
 import { NavUserButton } from "./nav-user-button";
+import { Button } from "@/components/ui/button";
+import { StoreIcon } from "lucide-react";
 
 export const Navbar = () => {
   return (
@@ -16,7 +18,10 @@ export const Navbar = () => {
 
       <div />
 
-      <div>
+      <div className="flex justify-center items-center gap-x-3">
+        <Button variant={`outline`} size={`icon`} className="shadow-none">
+          <StoreIcon />
+        </Button>
         <NavUserButton />
       </div>
     </div>

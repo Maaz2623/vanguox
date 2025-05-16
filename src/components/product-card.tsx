@@ -63,7 +63,7 @@ export const ProductCard = ({
             {price}
           </span>
           <Button className="rounded-full px-5 py-2 text-sm font-medium">
-            Go to shop <ArrowUpRightFromSquareIcon />
+            Go to store <ArrowUpRightFromSquareIcon />
           </Button>
         </div>
       </div>
