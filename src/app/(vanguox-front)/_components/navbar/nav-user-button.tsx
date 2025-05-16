@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { authClient } from "@/lib/auth-client";
+import { authClient, signOut } from "@/lib/auth-client";
 import { motion } from "framer-motion";
 
 export const NavUserButton = () => {
@@ -38,13 +38,24 @@ export const NavUserButton = () => {
               <Skeleton className="bg-gray-400 shadow-sm" />
             </AvatarFallback>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="mr-4">
+          <DropdownMenuContent align="end" side="bottom" className="w-56">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
+
             <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Billing</DropdownMenuItem>
-            <DropdownMenuItem>Team</DropdownMenuItem>
-            <DropdownMenuItem>Subscription</DropdownMenuItem>
+            <DropdownMenuItem>Settings</DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-red-600"
+              onClick={() => {
+                signOut().then(() => {
+                  window.location.href = "/auth/sign-in";
+                });
+              }}
+            >
+              Log out
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </Avatar>
