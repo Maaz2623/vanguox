@@ -54,7 +54,7 @@ export const protectedProcedure = t.procedure.use(async function isAuthed(
     .where(eq(user.id, ctx.userId))
     .limit(1);
 
-  if (!user) {
+  if (!userData) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
     });

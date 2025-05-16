@@ -1,10 +1,19 @@
-import { caller } from "@/trpc/server";
-import React from "react";
+import { HydrateClient, prefetch, trpc } from "@/trpc/server";
+import { ErrorBoundary } from "react-error-boundary";
+import React, { Suspense } from "react";
 
 const VanguoxFrontPage = async () => {
-  const data = await caller.users.getUserData();
+  await prefetch(trpc.users.getUserData.queryOptions());
 
-  return <div>Vanguox Front Page {JSON.stringify(data)}</div>;
+  return (
+    <HydrateClient>
+      <ErrorBoundary fallback={<p>error</p>}>
+        <Suspense fallback={<div>Loading...</div>}>
+          <div>Vanguox Front Page</div>
+        </Suspense>
+      </ErrorBoundary>
+    </HydrateClient>
+  );
 };
 
 export default VanguoxFrontPage;
