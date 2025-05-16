@@ -7,7 +7,8 @@ export const usersRouter = createTRPCRouter({
 
     if (!user) {
       throw new TRPCError({
-        code: "NOT_FOUND",
+        code: "UNAUTHORIZED",
+        message: "User data not found in context",
       });
     }
 

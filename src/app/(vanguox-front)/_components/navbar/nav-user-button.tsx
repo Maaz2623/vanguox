@@ -8,13 +8,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useTRPC } from "@/trpc/client";
-import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
+import { authClient } from "@/lib/auth-client";
+import { motion } from "framer-motion";
 
 export const NavUserButton = () => {
-  const trpc = useTRPC();
+  const { data } = authClient.useSession();
 
-  const { data: user } = useQuery(trpc.users.getUserData.queryOptions());
+  const user = data?.user;
 
   return (
     <div>
@@ -22,9 +23,20 @@ export const NavUserButton = () => {
         <DropdownMenu>
           <DropdownMenuTrigger>
             {user && user.image && (
-              <AvatarImage className="cursor-pointer" src={user.image} />
+              <motion.div
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+              >
+                <AvatarImage
+                  className="cursor-pointer rounded-lg"
+                  src={user.image}
+                />
+              </motion.div>
             )}
-            <AvatarFallback>CN</AvatarFallback>
+            <AvatarFallback className="size-10 rounded-lg">
+              <Skeleton className="bg-gray-400 shadow-sm" />
+            </AvatarFallback>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="mr-4">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
