@@ -6,14 +6,14 @@ export const Navbar = () => {
   return (
     <div className="border-b px-3 py-5 flex justify-between items-center">
       <Image
-        src={`/logo.svg`}
+        src="/logo.svg"
         height={150}
         width={150}
         alt="logo"
-        className=""
+        priority
+        className="w-[150px] h-auto"
       />
 
-      
       <div />
 
       <div>
