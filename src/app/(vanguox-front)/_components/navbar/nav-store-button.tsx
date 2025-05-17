@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   StoreIcon,
@@ -15,6 +16,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useState } from "react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 // Dummy store list — replace with dynamic data later
 const userStores = [
@@ -24,47 +36,95 @@ const userStores = [
 ];
 
 export const NavStoreButton = () => {
+  const [createStoreDialog, setCreateStoreDialog] = useState(false);
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon" className="shadow-none">
-          <StoreIcon className="h-5 w-5" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>Stores Created</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {userStores.map((store) => (
-          <DropdownMenuItem key={store.id}>
-            <WarehouseIcon />
-            {store.name}
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="icon" className="shadow-none">
+            <StoreIcon className="h-5 w-5" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56" align="end" side="bottom">
+          <DropdownMenuLabel>Stores Created</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {userStores.map((store) => (
+            <DropdownMenuItem key={store.id}>
+              <WarehouseIcon />
+              {store.name}
+            </DropdownMenuItem>
+          ))}
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuLabel>Store Management</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem>
+            <ShoppingCart className="mr-2 h-4 w-4" />
+            Orders
           </DropdownMenuItem>
-        ))}
+          <DropdownMenuItem>
+            <Package className="mr-2 h-4 w-4" />
+            Products
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <Settings className="mr-2 h-4 w-4" />
+            Settings
+          </DropdownMenuItem>
 
-        <DropdownMenuSeparator />
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => setCreateStoreDialog(true)}>
+            <PlusCircle className="mr-2 h-4 w-4 text-green-600" />
+            Create Store
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-        <DropdownMenuLabel>Store Management</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <ShoppingCart className="mr-2 h-4 w-4" />
-          Orders
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Package className="mr-2 h-4 w-4" />
-          Products
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Settings className="mr-2 h-4 w-4" />
-          Settings
-        </DropdownMenuItem>
+      <CreateStoreDialog
+        open={createStoreDialog}
+        setOpen={setCreateStoreDialog}
+      />
+    </>
+  );
+};
 
-        <DropdownMenuSeparator />
+const CreateStoreDialog = ({
+  open,
+  setOpen,
+}: {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}) => {
+  const [shopName, setShopName] = useState("");
 
-        <DropdownMenuItem>
-          <PlusCircle className="mr-2 h-4 w-4 text-green-600" />
-          Create Store
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Create a new store</DialogTitle>
+          <DialogDescription>
+            Give your store a unique name. You can change this later.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid w-full items-center gap-2">
+            <Label htmlFor="shop-name">Shop Name</Label>
+            <Input
+              id="shop-name"
+              placeholder="e.g. FreshMart, PixelHub..."
+              value={shopName}
+              onChange={(e) => setShopName(e.target.value)}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          <Button onClick={() => {}}>Create</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
