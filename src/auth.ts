@@ -4,6 +4,19 @@ import { db } from "./db";
 import * as schema from "./db/schema";
 
 export const auth = betterAuth({
+  advanced: {
+    crossSubDomainCookies: {
+      enabled: true,
+      domain: ".vanguox.com",
+    },
+    defaultCookieAttributes: {
+      secure: true,
+      httpOnly: true,
+      sameSite: "none",
+      partitioned: true,
+    },
+    useSecureCookies: true,
+  },
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
