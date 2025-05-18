@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 import { TRPCReactProvider } from "@/trpc/client";
 
@@ -21,7 +22,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <TRPCReactProvider>
-        <body className={`${poppins.className} antialiased`}>{children}</body>
+        <body className={`${poppins.className} antialiased`}>
+          {children}
+
+          <Toaster />
+        </body>
       </TRPCReactProvider>
     </html>
   );

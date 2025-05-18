@@ -27,6 +27,10 @@ import {
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { useMutation } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 // Dummy store list — replace with dynamic data later
 const userStores = [
@@ -97,6 +101,32 @@ const CreateStoreDialog = ({
   setOpen: (open: boolean) => void;
 }) => {
   const [shopName, setShopName] = useState("");
+  const trpc = useTRPC();
+
+  const mutation = useMutation(trpc.stores.createStore.mutationOptions());
+
+  const router = useRouter();
+
+  const handleCreateStore = async () => {
+    const createStore = mutation.mutateAsync(
+      {
+        name: shopName,
+      },
+
+      {
+        onSuccess: (data) => {
+          toast.promise(createStore, {
+            loading: "Creating your store",
+            success: "Store has been created. Redirecting...",
+            error: "Something went wrong",
+          });
+          router.push(`/stores/${data.name}`);
+          setShopName("");
+          setOpen(false);
+        },
+      }
+    );
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -111,6 +141,7 @@ const CreateStoreDialog = ({
           <div className="grid w-full items-center gap-2">
             <Label htmlFor="shop-name">Shop Name</Label>
             <Input
+              disabled={mutation.isPending}
               id="shop-name"
               placeholder="e.g. FreshMart, PixelHub..."
               value={shopName}
@@ -119,10 +150,16 @@ const CreateStoreDialog = ({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button
+            disabled={mutation.isPending}
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
             Cancel
           </Button>
-          <Button onClick={() => {}}>Create</Button>
+          <Button disabled={mutation.isPending} onClick={handleCreateStore}>
+            Create
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
