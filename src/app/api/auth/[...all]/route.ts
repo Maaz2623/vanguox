@@ -1,6 +1,4 @@
-// File: /app/api/auth/route.ts  (or pages/api/auth/[...betterauth].ts in pages folder)
-
-import { auth } from "@/auth"; // adjust your path here
+import { auth } from "@/auth";
 import { toNextJsHandler } from "better-auth/next-js";
 
 const { GET: rawGET, POST: rawPOST } = toNextJsHandler(auth);
@@ -16,7 +14,43 @@ function isAllowedOrigin(origin: string) {
   }
 }
 
-export async function OPTIONS(req: Request) {
+export const GET = async (req: Request) => {
+  if (process.env.NODE_ENV !== "production") {
+    return rawGET(req);
+  }
+
+  const res = await rawGET(req);
+  const origin = req.headers.get("origin") || "";
+
+  if (isAllowedOrigin(origin)) {
+    res.headers.set("Access-Control-Allow-Origin", origin);
+    res.headers.set("Access-Control-Allow-Credentials", "true");
+  }
+
+  return res;
+};
+
+export const POST = async (req: Request) => {
+  if (process.env.NODE_ENV !== "production") {
+    return rawPOST(req);
+  }
+
+  const res = await rawPOST(req);
+  const origin = req.headers.get("origin") || "";
+
+  if (isAllowedOrigin(origin)) {
+    res.headers.set("Access-Control-Allow-Origin", origin);
+    res.headers.set("Access-Control-Allow-Credentials", "true");
+  }
+
+  return res;
+};
+
+export const OPTIONS = async (req: Request) => {
+  if (process.env.NODE_ENV !== "production") {
+    return new Response(null, { status: 204 });
+  }
+
   const origin = req.headers.get("origin") || "";
 
   if (!isAllowedOrigin(origin)) {
@@ -32,28 +66,4 @@ export async function OPTIONS(req: Request) {
       "Access-Control-Allow-Credentials": "true",
     },
   });
-}
-
-export async function GET(req: Request) {
-  const res = await rawGET(req);
-  const origin = req.headers.get("origin") || "";
-
-  if (isAllowedOrigin(origin)) {
-    res.headers.set("Access-Control-Allow-Origin", origin);
-    res.headers.set("Access-Control-Allow-Credentials", "true");
-  }
-
-  return res;
-}
-
-export async function POST(req: Request) {
-  const res = await rawPOST(req);
-  const origin = req.headers.get("origin") || "";
-
-  if (isAllowedOrigin(origin)) {
-    res.headers.set("Access-Control-Allow-Origin", origin);
-    res.headers.set("Access-Control-Allow-Credentials", "true");
-  }
-
-  return res;
-}
+};

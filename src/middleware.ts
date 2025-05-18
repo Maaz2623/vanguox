@@ -16,14 +16,16 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(signInUrl);
   }
 
-  const url = new URL(req.url);
+  if (process.env.NODE_ENV === "production") {
+    const url = new URL(req.url);
 
-  console.log(url.pathname);
+    console.log(url.pathname);
 
-  if (url.pathname.startsWith(`/stores/`)) {
-    const slug = url.pathname.split(`/`)[2];
+    if (url.pathname.startsWith(`/stores/`)) {
+      const slug = url.pathname.split(`/`)[2];
 
-    return NextResponse.redirect(`https://${slug}.vanguox.com`);
+      return NextResponse.redirect(`https://${slug}.vanguox.com`);
+    }
   }
 
   return NextResponse.next();
