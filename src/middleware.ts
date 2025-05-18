@@ -16,7 +16,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(signInUrl);
   }
 
-  const pathname = req.url;
+  const url = new URL(req.url);
+
+  console.log(url.pathname);
 
   if (pathname.startsWith(`/stores/`)) {
     const slug = pathname.split(`/`)[2];
@@ -28,5 +30,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/"],
+  matcher: ["/", "/stores/:slug*"],
 };
