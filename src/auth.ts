@@ -17,6 +17,7 @@ export const auth = betterAuth({
     },
     useSecureCookies: true,
   },
+  trustedOrigins: ["https://vanguox.com", "https://*.vanguox.com"],
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,

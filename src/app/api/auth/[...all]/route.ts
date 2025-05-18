@@ -1,12 +1,14 @@
-import { auth } from "@/auth";
+// File: /app/api/auth/route.ts  (or pages/api/auth/[...betterauth].ts in pages folder)
+
+import { auth } from "@/auth"; // adjust your path here
 import { toNextJsHandler } from "better-auth/next-js";
 
-const { POST: rawPOST, GET: rawGET } = toNextJsHandler(auth);
+const { GET: rawGET, POST: rawPOST } = toNextJsHandler(auth);
 
+// Utility function to check allowed origins (adjust your domains here)
 function isAllowedOrigin(origin: string) {
   try {
     const url = new URL(origin);
-    // Allow only subdomains of vanguox.com or the apex domain
     return (
       url.hostname === "vanguox.com" || url.hostname.endsWith(".vanguox.com")
     );
