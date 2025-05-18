@@ -115,17 +115,17 @@ const CreateStoreDialog = ({
 
       {
         onSuccess: (data) => {
-          toast.promise(createStore, {
-            loading: "Creating your store",
-            success: "Store has been created. Redirecting...",
-            error: "Something went wrong",
-          });
           router.push(`/stores/${data.name}`);
           setShopName("");
           setOpen(false);
         },
       }
     );
+    toast.promise(createStore, {
+      loading: "Creating your store",
+      success: "Store has been created. Redirecting...",
+      error: "Something went wrong",
+    });
   };
 
   return (

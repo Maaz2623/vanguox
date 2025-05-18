@@ -1,4 +1,3 @@
-import { SearchBar } from "@/components/search-bar";
 import { Navbar } from "./_components/navbar";
 
 export default async function VanguoxFrontLayout({
@@ -9,10 +8,7 @@ export default async function VanguoxFrontLayout({
   return (
     <div>
       <Navbar />
-      <div className="px-3 py-3">
-        <SearchBar />
-        {children}
-      </div>
+      <div className="px-3 py-3">{children}</div>
     </div>
   );
 }
