@@ -20,8 +20,8 @@ export async function middleware(req: NextRequest) {
 
   console.log(url.pathname);
 
-  if (pathname.startsWith(`/stores/`)) {
-    const slug = pathname.split(`/`)[2];
+  if (url.pathname.startsWith(`/stores/`)) {
+    const slug = url.pathname.split(`/`)[2];
 
     return NextResponse.redirect(`https://${slug}.vanguox.com`);
   }
