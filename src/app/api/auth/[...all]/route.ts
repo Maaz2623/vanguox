@@ -5,7 +5,6 @@ import { toNextJsHandler } from "better-auth/next-js";
 
 const { GET: rawGET, POST: rawPOST } = toNextJsHandler(auth);
 
-// Utility function to check allowed origins (adjust your domains here)
 function isAllowedOrigin(origin: string) {
   try {
     const url = new URL(origin);

@@ -108,6 +108,13 @@ const CreateStoreDialog = ({
   const router = useRouter();
 
   const handleCreateStore = async () => {
+    const subdomainRegex = /^[a-z][a-z0-9-]{2,29}$/;
+    if (!subdomainRegex.test(shopName)) {
+      toast.error(
+        "Store name must be 3–30 characters, lowercase, and URL-safe."
+      );
+      return;
+    }
     const createStore = mutation.mutateAsync(
       {
         name: shopName,
@@ -145,7 +152,7 @@ const CreateStoreDialog = ({
               id="shop-name"
               placeholder="e.g. FreshMart, PixelHub..."
               value={shopName}
-              onChange={(e) => setShopName(e.target.value)}
+              onChange={(e) => setShopName(e.target.value.toLowerCase())}
             />
           </div>
         </div>
