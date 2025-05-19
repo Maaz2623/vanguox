@@ -9,14 +9,18 @@ export default async function VanguoxFrontLayout({
   children: React.ReactNode;
 }) {
   const host = (await headers()).get("host")!;
+  const isSubdomain = host.split(".").length > 2;
 
-  const subdomain = await getSubdomain(host);
+  let subdomain: string | null = null;
 
-  if (!subdomain) return <div>No store with this name</div>;
+  if (isSubdomain) {
+    subdomain = await getSubdomain(host);
+    if (!subdomain) return <div>No store with this name</div>;
+  }
 
   return (
     <div>
-      {!subdomain ? <Navbar /> : <StoreNavbar />}
+      {isSubdomain ? <StoreNavbar /> : <Navbar />}
       <div className="px-3 py-3">{children}</div>
     </div>
   );
