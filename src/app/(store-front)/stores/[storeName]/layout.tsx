@@ -11,7 +11,9 @@ export default async function StoreLayout({
 
   const subdomain = getSubdomain(host);
 
-  if (!subdomain) return <div>No store with this name</div>;  
+  if (!subdomain) return <div>No store with this name</div>;
+
+  console.log(subdomain);
 
   return (
     <div>
