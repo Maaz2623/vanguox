@@ -9,7 +9,7 @@ export default async function StoreLayout({
 }) {
   const host = (await headers()).get("host")!;
 
-  const subdomain = getSubdomain(host);
+  const subdomain = await getSubdomain(host);
 
   if (!subdomain) return <div>No store with this name</div>;
 
