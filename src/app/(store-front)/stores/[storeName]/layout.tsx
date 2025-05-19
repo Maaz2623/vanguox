@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { StoreNavbar } from "./_components/store-navbar";
-import { getSubdomain } from "@/lib/utils";
+import { getSubdomain } from "@/helpers/get-subdomain";
 
 export default async function StoreLayout({
   children,
