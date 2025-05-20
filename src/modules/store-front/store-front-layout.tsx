@@ -5,7 +5,7 @@ import StoreFrontPage from "./store-front-page";
 export default async function StoreFrontLayout({
   subdomain,
 }: {
-  subdomain: string | null;
+  subdomain?: string | null;
 }) {
   if (subdomain) {
     console.log(subdomain);
