@@ -1,7 +1,5 @@
-import React from "react";
+import StoreFrontLayout from "@/modules/store-front/store-front-layout";
 
-const StorePage = () => {
-  return <div>Store Page</div>;
-};
-
-export default StorePage;
+export default async function StoreLayout() {
+  return <StoreFrontLayout></StoreFrontLayout>;
+}

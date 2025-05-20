@@ -1,7 +1,7 @@
 import Image from "next/image";
 import React from "react";
-import { NavUserButton } from "./nav-user-button";
 import { NavStoreButton } from "./nav-store-button";
+import { NavUserButton } from "./nav-user-button";
 
 export const Navbar = () => {
   return (
