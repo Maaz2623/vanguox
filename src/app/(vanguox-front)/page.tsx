@@ -2,28 +2,26 @@ import { getSubdomain } from "@/helpers/get-subdomain";
 import StoreFrontLayout from "@/modules/store-front/store-front-layout";
 import VanguoxFrontLayout from "@/modules/vanguox-front/vanguox-front-layout";
 import { headers } from "next/headers";
-import React from "react";
 import { notFound } from "next/navigation";
 
 const MainPage = async () => {
-  if (process.env.NODE_ENV === "production") {
-    const host = (await headers()).get("host") || ""; // ❗ no await
+  const host = (await headers()).get("host") || "";
+  const subdomain = await getSubdomain(host);
 
-    const subdomain = await getSubdomain(host);
+  const isRootDomain = host === "vanguox.com" || host === "www.vanguox.com";
 
-    // Optionally check against a whitelist of valid subdomains
-    if (host && host !== "vanguox.com" && !subdomain) {
-      notFound(); // Show 404 page if subdomain exists but store not found
-    }
-
-    // Show store layout if subdomain is found
-    if (subdomain) {
-      return <StoreFrontLayout />;
-    }
-  } else {
-    // Otherwise, show the root Vanguox layout
-    return <VanguoxFrontLayout />;
+  // ✅ Case: Subdomain (e.g., tsf.vanguox.com)
+  if (!isRootDomain && subdomain) {
+    return <StoreFrontLayout />;
   }
+
+  // 🚫 Subdomain exists, but no store found
+  if (!isRootDomain && !subdomain) {
+    notFound(); // Triggers 404
+  }
+
+  // ✅ Root domain (vanguox.com)
+  return <VanguoxFrontLayout />;
 };
 
 export default MainPage;
