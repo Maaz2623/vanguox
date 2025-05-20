@@ -1,4 +1,4 @@
-export default async function StoreFrontLayout({
+export default async function SubdomainLayout({
   children,
 }: {
   children: React.ReactNode;
