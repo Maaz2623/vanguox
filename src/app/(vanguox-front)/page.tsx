@@ -8,7 +8,11 @@ const MainPage = async () => {
   const host = (await headers()).get("host") || "";
   const subdomain = await getSubdomain(host);
 
-  const isRootDomain = host === "vanguox.com" || host === "www.vanguox.com";
+  const isRootDomain =
+    host === "vanguox.com" ||
+    host === "www.vanguox.com" ||
+    host === "localhost" ||
+    host === "localhost:3000";
 
   // ✅ Case: Subdomain (e.g., tsf.vanguox.com)
   if (!isRootDomain && subdomain) {
