@@ -16,7 +16,7 @@ const MainPage = async () => {
 
   // ✅ Case: Subdomain (e.g., tsf.vanguox.com)
   if (!isRootDomain && subdomain) {
-    return <StoreFrontLayout />;
+    return <StoreFrontLayout subdomain={subdomain} />;
   }
 
   // 🚫 Subdomain exists, but no store found
