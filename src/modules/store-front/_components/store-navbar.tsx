@@ -1,6 +1,12 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { MinusIcon, PlusIcon, ShoppingCartIcon } from "lucide-react";
+import {
+  MinusIcon,
+  PlusIcon,
+  SettingsIcon,
+  ShoppingCartIcon,
+} from "lucide-react";
+import { Settings } from "lucide-react";
 import Image from "next/image";
 import {
   Sheet,
@@ -12,6 +18,15 @@ import {
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
 
 export const StoreNavbar = () => {
   const [open, setOpen] = useState(false);
@@ -31,6 +46,7 @@ export const StoreNavbar = () => {
         <div />
 
         <div className="flex justify-center items-center gap-x-3">
+          <StoreSettingsDialog storeName="next" />
           <Button
             variant={`outline`}
             size={`icon`}
@@ -41,6 +57,7 @@ export const StoreNavbar = () => {
           </Button>
         </div>
       </div>
+
       <CartSheet
         open={open}
         setOpen={setOpen}
@@ -182,5 +199,33 @@ export const CartSheet = ({
         </div>
       </SheetContent>
     </Sheet>
+  );
+};
+
+const StoreSettingsDialog = ({ storeName }: { storeName: string }) => {
+  const router = useRouter();
+  return (
+    <DropdownMenu>
+      {/* Invisible trigger to anchor the dropdown */}
+      <DropdownMenuTrigger asChild>
+        <Button variant={`outline`} size={`icon`}>
+          <SettingsIcon />
+        </Button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent className="w-56" side="bottom" align="end">
+        <DropdownMenuLabel className="text-muted-foreground">
+          My Store
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem
+          onClick={() => router.push(`/stores/${storeName}/manage`)}
+        >
+          <Settings className="mr-2 h-4 w-4" />
+          <span>Manage</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
