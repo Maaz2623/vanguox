@@ -27,9 +27,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
 
 export const StoreNavbar = () => {
   const [open, setOpen] = useState(false);
+
+  const trpc = useTRPC();
+
+  const { data } = useQuery(
+    trpc.stores.getStoreByNameAndUserId.queryOptions({
+      storeName: "next",
+    })
+  );
 
   return (
     <>
@@ -46,7 +56,7 @@ export const StoreNavbar = () => {
         <div />
 
         <div className="flex justify-center items-center gap-x-3">
-          <StoreSettingsDialog storeName="next" />
+          {data && data.store && <StoreSettingsDialog storeName={data.store.name} />}
           <Button
             variant={`outline`}
             size={`icon`}

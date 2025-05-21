@@ -1,8 +1,11 @@
 import { getSubdomain } from "@/helpers/get-subdomain";
 import StoreFrontLayout from "@/modules/store-front/store-front-layout";
 import VanguoxFrontLayout from "@/modules/vanguox-front/vanguox-front-layout";
+import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 
 const MainPage = async () => {
   const host = (await headers()).get("host") || "";
@@ -16,7 +19,22 @@ const MainPage = async () => {
 
   // ✅ Case: Subdomain (e.g., tsf.vanguox.com)
   if (!isRootDomain && subdomain) {
-    return <StoreFrontLayout subdomain={subdomain} />;
+    
+    prefetch(
+      trpc.stores.getStoreByNameAndUserId.queryOptions({
+        storeName: subdomain,
+      })
+    );
+
+    return (
+      <HydrateClient>
+        <ErrorBoundary fallback={<div>error</div>}>
+          <Suspense fallback={<div>loading...</div>}>
+            <StoreFrontLayout subdomain={subdomain} />
+          </Suspense>
+        </ErrorBoundary>
+      </HydrateClient>
+    );
   }
 
   // 🚫 Subdomain exists, but no store found
