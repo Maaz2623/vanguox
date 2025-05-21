@@ -19,7 +19,6 @@ const MainPage = async () => {
 
   // ✅ Case: Subdomain (e.g., tsf.vanguox.com)
   if (!isRootDomain && subdomain) {
-    
     prefetch(
       trpc.stores.getStoreByNameAndUserId.queryOptions({
         storeName: subdomain,

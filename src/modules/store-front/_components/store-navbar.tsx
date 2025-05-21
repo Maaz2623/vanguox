@@ -27,17 +27,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 
-export const StoreNavbar = () => {
+export const StoreNavbar = ({ subdomain }: { subdomain: string }) => {
   const [open, setOpen] = useState(false);
 
   const trpc = useTRPC();
 
-  const { data } = useQuery(
+  const { data } = useSuspenseQuery(
     trpc.stores.getStoreByNameAndUserId.queryOptions({
-      storeName: "next",
+      storeName: subdomain,
     })
   );
 
@@ -56,7 +56,7 @@ export const StoreNavbar = () => {
         <div />
 
         <div className="flex justify-center items-center gap-x-3">
-          {data && data.store && <StoreSettingsDialog storeName={data.store.name} />}
+          {data.owner && <StoreSettingsDialog storeName={data.store.name} />}
           <Button
             variant={`outline`}
             size={`icon`}

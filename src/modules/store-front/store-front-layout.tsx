@@ -15,7 +15,7 @@ export default async function StoreFrontLayout({
   }
   return (
     <>
-      <StoreNavbar />
+      <StoreNavbar subdomain={subdomain as string} />
       <div className="px-3 py-3">
         <SearchBar />
         {children}
