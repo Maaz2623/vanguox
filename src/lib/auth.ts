@@ -7,8 +7,7 @@ import { sendEmail } from "./email";
 export const auth = betterAuth({
   emailVerification: {
     sendOnSignUp: true,
-    sendVerificationEmail: async ({ user, url, token }) => {
-      console.log(token);
+    sendVerificationEmail: async ({ user, url }) => {
       await sendEmail({
         to: user.email,
         subject: "Verify your email address",
