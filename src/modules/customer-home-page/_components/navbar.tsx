@@ -24,6 +24,7 @@ import { User, BadgeDollarSign, LogOut, Settings } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export const Navbar = () => {
   const {
@@ -91,8 +92,10 @@ export const Navbar = () => {
   ];
 
   return (
-    <div className="border h-14 px-3 rounded-lg flex justify-between items-center">
-      <div />
+    <div className="border h-14 px-3 bg-white rounded-lg flex justify-between items-center">
+      <div>
+        <Image src={`/logo.svg`} alt="logo" width={150} height={100} />
+      </div>
       <NavigationMenu viewport={false}>
         <NavigationMenuList>
           <NavigationMenuItem>

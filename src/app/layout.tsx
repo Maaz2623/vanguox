@@ -21,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppins.className} antialiased`}>
+      <body className={`${poppins.className} antialiased bg-gray-50`}>
         <TRPCReactProvider>
           {children} <Toaster position="top-center" />
         </TRPCReactProvider>
