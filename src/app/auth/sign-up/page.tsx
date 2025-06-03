@@ -82,7 +82,7 @@ function LoginForm({ className, setFormType, ...props }: FormProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleFormSubmit}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
@@ -112,11 +112,7 @@ function LoginForm({ className, setFormType, ...props }: FormProps) {
                 />
               </div>
               <div className="flex flex-col gap-3">
-                <Button
-                  onSubmit={handleFormSubmit}
-                  type="submit"
-                  className="w-full"
-                >
+                <Button type="submit" className="w-full">
                   Login
                 </Button>
                 <Button variant="outline" className="w-full">
@@ -190,7 +186,7 @@ function SignUpForm({ className, setFormType, ...props }: FormProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleFormSubmit}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
                 <Label htmlFor="name">Name</Label>
@@ -222,11 +218,7 @@ function SignUpForm({ className, setFormType, ...props }: FormProps) {
                 />
               </div>
               <div className="flex flex-col gap-3">
-                <Button
-                  type="submit"
-                  className="w-full"
-                  onSubmit={handleFormSubmit}
-                >
+                <Button type="submit" className="w-full">
                   Create Account
                 </Button>
                 <Button variant="outline" className="w-full">
