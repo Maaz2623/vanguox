@@ -113,7 +113,7 @@ function LoginForm({ className, setFormType, ...props }: FormProps) {
               </div>
               <div className="flex flex-col gap-3">
                 <Button
-                  onClick={handleFormSubmit}
+                  onSubmit={handleFormSubmit}
                   type="submit"
                   className="w-full"
                 >
@@ -225,7 +225,7 @@ function SignUpForm({ className, setFormType, ...props }: FormProps) {
                 <Button
                   type="submit"
                   className="w-full"
-                  onClick={handleFormSubmit}
+                  onSubmit={handleFormSubmit}
                 >
                   Create Account
                 </Button>
