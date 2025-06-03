@@ -41,7 +41,8 @@ function LoginForm({ className, setFormType, ...props }: FormProps) {
 
   const router = useRouter();
 
-  const handleFormSubmit = async () => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     await authClient.signIn.email(
       {
         email,
@@ -144,7 +145,8 @@ function SignUpForm({ className, setFormType, ...props }: FormProps) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleFormSubmit = async () => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     await authClient.signUp.email(
       {
         name,
