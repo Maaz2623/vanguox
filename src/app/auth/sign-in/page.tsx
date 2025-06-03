@@ -55,7 +55,7 @@ interface FormProps extends React.ComponentProps<"div"> {
   setFormType: (formType: "login" | "signup") => void;
 }
 
-function LoginForm({ className, setFormType, ...props }: FormProps) {
+function LoginForm({ className, setFormType }: FormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -111,7 +111,7 @@ function LoginForm({ className, setFormType, ...props }: FormProps) {
   }
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn("flex flex-col gap-6", className)}>
       <Card>
         <CardHeader>
           <CardTitle>Login to your account</CardTitle>
@@ -173,7 +173,7 @@ function LoginForm({ className, setFormType, ...props }: FormProps) {
   );
 }
 
-function SignUpForm({ className, setFormType, ...props }: FormProps) {
+function SignUpForm({ className, setFormType }: FormProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -227,7 +227,7 @@ function SignUpForm({ className, setFormType, ...props }: FormProps) {
   }
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn("flex flex-col gap-6", className)}>
       <Card>
         <CardHeader>
           <CardTitle>Create a new account</CardTitle>
