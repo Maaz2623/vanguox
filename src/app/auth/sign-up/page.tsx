@@ -166,7 +166,7 @@ function SignUpForm({ className, setFormType, ...props }: FormProps) {
 
         onError(context) {
           setLoading(false);
-          alert(context.error);
+          alert(JSON.stringify(context.error));
         },
       }
     );
