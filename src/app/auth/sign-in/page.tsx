@@ -55,7 +55,7 @@ interface FormProps extends React.ComponentProps<"div"> {
   setFormType: (formType: "login" | "signup") => void;
 }
 
-function LoginForm({ className, formType, setFormType, ...props }: FormProps) {
+function LoginForm({ className, setFormType, ...props }: FormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -173,7 +173,7 @@ function LoginForm({ className, formType, setFormType, ...props }: FormProps) {
   );
 }
 
-function SignUpForm({ className, formType, setFormType, ...props }: FormProps) {
+function SignUpForm({ className, setFormType, ...props }: FormProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -196,7 +196,6 @@ function SignUpForm({ className, formType, setFormType, ...props }: FormProps) {
           onSuccess: () => {
             setLoading(false);
             resolve("Account created successfully");
-            router;
           },
           onError(ctx) {
             setLoading(false);
