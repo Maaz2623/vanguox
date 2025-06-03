@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { FullScreenLoader } from "@/components/full-screen-loader";
+import { toast } from "sonner";
 
 const SignUpPage = () => {
   const [formType, setFormType] = useState<"login" | "signup">("login");
@@ -63,30 +64,46 @@ function LoginForm({ className, formType, setFormType, ...props }: FormProps) {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await authClient.signIn.email(
-      {
-        email,
-        password,
-      },
-      {
-        onRequest: () => {
-          setLoading(true);
+
+    const signupPromise = new Promise(async (resolve, reject) => {
+      const result = await authClient.signIn.email(
+        {
+          email,
+          password,
         },
-        onSuccess: () => {
-          setLoading(false);
-          router.push(`/`);
-        },
-        onError(ctx) {
-          setLoading(false);
-          // Handle the error
-          if (ctx.error.status === 403) {
-            alert("Please verify your email address");
-          }
-          //you can also show the original error message
-          alert(ctx.error.message);
-        },
+        {
+          onRequest: () => setLoading(true),
+          onSuccess: () => {
+            setLoading(false);
+            resolve("Signed in successfully");
+            router.push(`/`);
+          },
+          onError(ctx) {
+            setLoading(false);
+
+            // Build custom error message
+            let message = ctx.error.message;
+            if (ctx.error.status === 403) {
+              message = "Please verify your email address.";
+            }
+
+            reject(new Error(message));
+          },
+        }
+      );
+
+      // Fallback rejection in case result contains error but onError wasn't triggered
+      if (result && "error" in result && result.error) {
+        reject(new Error(result.error.message));
       }
-    );
+    });
+
+    toast.promise(signupPromise, {
+      loading: "Signing in...",
+      success: (msg) => `${String(msg)}. verify email`,
+      error: (err) =>
+        err instanceof Error ? err.message : "Something went wrong",
+    });
   };
 
   if (loading) {
@@ -162,33 +179,45 @@ function SignUpForm({ className, formType, setFormType, ...props }: FormProps) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const router = useRouter();
+
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await authClient.signUp.email(
-      {
-        name,
-        email,
-        password,
-      },
-      {
-        onRequest: () => {
-          setLoading(true);
-        },
-        onSuccess: async () => {
-          await authClient.sendVerificationEmail({
-            email: email, // ✅ correct
-            callbackURL: "/", // or a custom page like /verify-email
-          });
-          setLoading(false);
-          alert("Please check your email to verify your account.");
-        },
 
-        onError(context) {
-          setLoading(false);
-          alert(JSON.stringify(context.error));
+    const signupPromise = new Promise(async (resolve, reject) => {
+      const result = await authClient.signUp.email(
+        {
+          name,
+          email,
+          password,
         },
+        {
+          onRequest: () => setLoading(true),
+          onSuccess: () => {
+            setLoading(false);
+            resolve("Account created successfully");
+            router;
+          },
+          onError(ctx) {
+            setLoading(false);
+            reject(new Error(ctx.error.message));
+            router.push(`/`);
+          },
+        }
+      );
+
+      // Optionally check result.error for additional rejection
+      if (result && "error" in result && result.error) {
+        reject(new Error(result.error.message));
       }
-    );
+    });
+
+    toast.promise(signupPromise, {
+      loading: "Creating account...",
+      success: (msg) => String(msg),
+      error: (err) =>
+        err instanceof Error ? err.message : "Something went wrong",
+    });
   };
 
   if (loading) {
