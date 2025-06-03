@@ -1,12 +1,8 @@
-import React from 'react'
+import { FullScreenLoader } from "@/components/full-screen-loader";
+import React from "react";
 
 const HomePage = () => {
+  return <div>Home Page </div>;
+};
 
-  return (
-    <div>
-      Hello World
-    </div>
-  )
-}
-
-export default HomePage
+export default HomePage;
