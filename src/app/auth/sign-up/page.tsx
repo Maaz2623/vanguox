@@ -34,7 +34,7 @@ interface FormProps extends React.ComponentProps<"div"> {
   setFormType: (formType: "login" | "signup") => void;
 }
 
-function LoginForm({ className, setFormType, formType, ...props }: FormProps) {
+function LoginForm({ className, setFormType, ...props }: FormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -55,9 +55,14 @@ function LoginForm({ className, setFormType, formType, ...props }: FormProps) {
           setLoading(false);
           router.push(`/`);
         },
-        onError(context) {
+        onError(ctx) {
           setLoading(false);
-          alert(context.error);
+          // Handle the error
+          if (ctx.error.status === 403) {
+            alert("Please verify your email address");
+          }
+          //you can also show the original error message
+          alert(ctx.error.message);
         },
       }
     );
@@ -137,13 +142,11 @@ function LoginForm({ className, setFormType, formType, ...props }: FormProps) {
   );
 }
 
-function SignUpForm({ className, formType, setFormType, ...props }: FormProps) {
+function SignUpForm({ className, setFormType, ...props }: FormProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const router = useRouter();
 
   const handleFormSubmit = async () => {
     await authClient.signUp.email(
@@ -156,10 +159,15 @@ function SignUpForm({ className, formType, setFormType, ...props }: FormProps) {
         onRequest: () => {
           setLoading(true);
         },
-        onSuccess: () => {
+        onSuccess: async () => {
+          await authClient.sendVerificationEmail({
+            email: email, // ✅ correct
+            callbackURL: "/", // or a custom page like /verify-email
+          });
           setLoading(false);
-          router.push(`/`);
+          alert("Please check your email to verify your account.");
         },
+
         onError(context) {
           setLoading(false);
           alert(context.error);
