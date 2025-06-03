@@ -1,7 +1,6 @@
 import { getQueryClient, trpc } from '@/trpc/server'
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query'
 import React, { Suspense } from 'react'
-import { ClientGreeting } from './client-greeting'
 
 const HomePage = () => {
 
@@ -12,12 +11,9 @@ const HomePage = () => {
   }))
 
   return (
-     <HydrationBoundary state={dehydrate(queryClient)}>
-      <Suspense>
-
-      <ClientGreeting />
-      </Suspense>
-    </HydrationBoundary>
+    <div>
+      Hello World
+    </div>
   )
 }
 
