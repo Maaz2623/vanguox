@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-
+import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,13 +15,33 @@ const SignUpPage = () => {
   const [formType, setFormType] = useState<"login" | "signup">("login");
 
   return (
-    <div className="flex min-h-screen justify-center items-center">
-      <div className="w-[30%]">
-        {formType === "login" ? (
-          <LoginForm formType={formType} setFormType={setFormType} />
-        ) : (
-          <SignUpForm setFormType={setFormType} formType={formType} />
-        )}
+    <div className="flex min-h-screen justify-center items-center px-4">
+      <div className="w-full max-w-sm px-4 perspective-1000">
+        <AnimatePresence mode="wait" initial={false}>
+          {formType === "login" ? (
+            <motion.div
+              key="login"
+              initial={{ rotateY: 90, opacity: 0 }}
+              animate={{ rotateY: 0, opacity: 1 }}
+              exit={{ rotateY: -90, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="backface-hidden"
+            >
+              <LoginForm formType={formType} setFormType={setFormType} />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="signup"
+              initial={{ rotateY: 90, opacity: 0 }}
+              animate={{ rotateY: 0, opacity: 1 }}
+              exit={{ rotateY: -90, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="backface-hidden"
+            >
+              <SignUpForm formType={formType} setFormType={setFormType} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -34,7 +54,7 @@ interface FormProps extends React.ComponentProps<"div"> {
   setFormType: (formType: "login" | "signup") => void;
 }
 
-function LoginForm({ className, setFormType, ...props }: FormProps) {
+function LoginForm({ className, formType, setFormType, ...props }: FormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -85,7 +105,7 @@ function LoginForm({ className, setFormType, ...props }: FormProps) {
         <CardContent>
           <form onSubmit={handleFormSubmit}>
             <div className="flex flex-col gap-6">
-              <div className="grid gap-3">
+              <div className="grid gap-1">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   onChange={(e) => setEmail(e.target.value)}
@@ -95,7 +115,7 @@ function LoginForm({ className, setFormType, ...props }: FormProps) {
                   required
                 />
               </div>
-              <div className="grid gap-3">
+              <div className="grid gap-1">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
                   <a
@@ -116,30 +136,27 @@ function LoginForm({ className, setFormType, ...props }: FormProps) {
                 <Button type="submit" className="w-full">
                   Login
                 </Button>
-                <Button variant="outline" className="w-full">
-                  Login with Google
-                </Button>
               </div>
             </div>
-            <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <Button
-                onClick={() => setFormType("signup")}
-                size={`sm`}
-                variant={`link`}
-                className="underline underline-offset-4 cursor-pointer w-13 text-sm"
-              >
-                Sign up
-              </Button>
-            </div>
           </form>
+          <div className="mt-4 text-center text-sm">
+            Don&apos;t have an account?{" "}
+            <Button
+              onClick={() => setFormType("signup")}
+              size={`sm`}
+              variant={`link`}
+              className="underline underline-offset-4 cursor-pointer w-13 text-sm"
+            >
+              Sign up
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
   );
 }
 
-function SignUpForm({ className, setFormType, ...props }: FormProps) {
+function SignUpForm({ className, formType, setFormType, ...props }: FormProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -190,7 +207,7 @@ function SignUpForm({ className, setFormType, ...props }: FormProps) {
         <CardContent>
           <form onSubmit={handleFormSubmit}>
             <div className="flex flex-col gap-6">
-              <div className="grid gap-3">
+              <div className="grid gap-1">
                 <Label htmlFor="name">Name</Label>
                 <Input
                   onChange={(e) => setName(e.target.value)}
@@ -200,7 +217,7 @@ function SignUpForm({ className, setFormType, ...props }: FormProps) {
                   required
                 />
               </div>
-              <div className="grid gap-3">
+              <div className="grid gap-1">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   onChange={(e) => setEmail(e.target.value)}
@@ -210,7 +227,7 @@ function SignUpForm({ className, setFormType, ...props }: FormProps) {
                   required
                 />
               </div>
-              <div className="grid gap-3">
+              <div className="grid gap-1">
                 <Label htmlFor="password">Password</Label>
                 <Input
                   onChange={(e) => setPassword(e.target.value)}
@@ -222,9 +239,6 @@ function SignUpForm({ className, setFormType, ...props }: FormProps) {
               <div className="flex flex-col gap-3">
                 <Button type="submit" className="w-full">
                   Create Account
-                </Button>
-                <Button variant="outline" className="w-full">
-                  Login with Google
                 </Button>
               </div>
             </div>
