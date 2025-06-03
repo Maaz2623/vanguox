@@ -1,4 +1,3 @@
-import { getQueryClient, trpc } from '@/trpc/server'
 import React from 'react'
 
 const HomePage = () => {
