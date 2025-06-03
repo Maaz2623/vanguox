@@ -23,7 +23,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${poppins.className} antialiased`}>
         <TRPCReactProvider>
-          {children} <Toaster />
+          {children} <Toaster position="top-center" />
         </TRPCReactProvider>
       </body>
     </html>

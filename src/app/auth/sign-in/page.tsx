@@ -100,7 +100,7 @@ function LoginForm({ className, formType, setFormType, ...props }: FormProps) {
 
     toast.promise(signupPromise, {
       loading: "Signing in...",
-      success: (msg) => `${String(msg)}. verify email`,
+      success: (msg) => `${String(msg)}.`,
       error: (err) =>
         err instanceof Error ? err.message : "Something went wrong",
     });
@@ -214,7 +214,10 @@ function SignUpForm({ className, formType, setFormType, ...props }: FormProps) {
 
     toast.promise(signupPromise, {
       loading: "Creating account...",
-      success: (msg) => String(msg),
+      success: () => {
+        setFormType("login");
+        return `Accunt created. Please verify your email and login.`;
+      },
       error: (err) =>
         err instanceof Error ? err.message : "Something went wrong",
     });
