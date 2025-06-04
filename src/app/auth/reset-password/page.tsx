@@ -1,10 +1,12 @@
-import React from "react";
+import React, { Suspense } from "react";
 import ResetPasswordForm from "./_components/reset-password-form";
 
 const Page = () => {
   return (
     <div>
-      <ResetPasswordForm />
+      <Suspense>
+        <ResetPasswordForm />
+      </Suspense>
     </div>
   );
 };
