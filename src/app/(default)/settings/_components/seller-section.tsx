@@ -29,6 +29,12 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import { CheckIcon } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 export const SellerSection = () => {
   const trpc = useTRPC();
@@ -42,29 +48,29 @@ export const SellerSection = () => {
   return (
     <>
       <SellerAccountForm open={open} setOpen={setOpen} />
-      <fieldset disabled={data.exists}>
-        <Card className="shadow-none w-full">
-          <CardHeader>
-            <CardTitle className="text-xl tracking-wide">Seller Mode</CardTitle>
-            <CardDescription>
-              Enable your seller dashboard and features
-            </CardDescription>
-            <CardAction>
-              <Button
-                onClick={() => setOpen(true)}
-                disabled={data.exists}
-                size={`sm`}
-              >
-                {data.exists && <CheckIcon className="size-4" />}
-                {data.exists ? "Activated" : "Activate"}
-              </Button>
-            </CardAction>
-          </CardHeader>
+      <Card className="shadow-none w-full">
+        <CardHeader>
+          <CardTitle className="text-xl tracking-wide">Seller Mode</CardTitle>
+          <CardDescription>
+            Enable your seller dashboard and features
+          </CardDescription>
+          <CardAction>
+            <Button
+              onClick={() => setOpen(true)}
+              disabled={data.exists}
+              size={`sm`}
+            >
+              {data.exists && <CheckIcon className="size-4" />}
+              {data.exists ? "Activated" : "Activate"}
+            </Button>
+          </CardAction>
+        </CardHeader>
 
-          <Separator />
+        <Separator />
 
-          <CardContent>
-            <div className="py-8 space-y-8">
+        <CardContent>
+          <fieldset disabled={data.exists}>
+            <div className="space-y-8">
               {/* UPI Section */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-muted-foreground">
@@ -134,11 +140,11 @@ export const SellerSection = () => {
                 </div>
               </div>
             </div>
-          </CardContent>
+          </fieldset>
+        </CardContent>
 
-          <CardFooter />
-        </Card>
-      </fieldset>
+        <CardFooter />
+      </Card>
     </>
   );
 };
