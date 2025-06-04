@@ -6,6 +6,7 @@ import { sendEmail } from "./email";
 
 export const auth = betterAuth({
   emailVerification: {
+    autoSignInAfterVerification: true,
     sendOnSignUp: true,
     sendVerificationEmail: async ({ user, url }) => {
       await sendEmail({
@@ -18,6 +19,13 @@ export const auth = betterAuth({
   emailAndPassword: {
     requireEmailVerification: true,
     enabled: true,
+    sendResetPassword: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: "Reset your password",
+        text: `Click the link to reset your password: ${url}`,
+      });
+    },
   },
   socialProviders: {
     google: {

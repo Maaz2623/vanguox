@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import Link from "next/link";
 
 const SignUpPage = () => {
   const [formType, setFormType] = useState<"login" | "signup">("login");
@@ -155,12 +156,12 @@ function LoginForm({ className, setFormType }: FormProps) {
                 <div className="grid gap-1">
                   <div className="flex items-center">
                     <Label htmlFor="password">Password</Label>
-                    <a
-                      href="#"
+                    <Link
+                      href="/auth/forgot-password"
                       className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                     >
                       Forgot your password?
-                    </a>
+                    </Link>
                   </div>
                   <Input
                     onChange={(e) => setPassword(e.target.value)}
