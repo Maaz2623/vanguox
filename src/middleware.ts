@@ -36,5 +36,5 @@ export async function middleware(req: NextRequest) {
 
 // Match both exact and dynamic routes
 export const config = {
-  matcher: ["/", "/stores/:path*", "/auth/sign-in"], // Works for /stores and any sub-path
+  matcher: "/:path*",
 };
