@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { FullScreenLoader } from "@/components/full-screen-loader";
 import { toast } from "sonner";
 
 const SignUpPage = () => {
