@@ -140,7 +140,7 @@ function LoginForm({ className, setFormType }: FormProps) {
               Enter your email below to login to your account
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="">
             <form onSubmit={handleFormSubmit}>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-1">
