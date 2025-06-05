@@ -29,13 +29,6 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import { CheckIcon } from "lucide-react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-
 export const SellerSection = () => {
   const trpc = useTRPC();
 
@@ -48,103 +41,147 @@ export const SellerSection = () => {
   return (
     <>
       <SellerAccountForm open={open} setOpen={setOpen} />
-      <Card className="shadow-none w-full">
-        <CardHeader>
-          <CardTitle className="text-xl tracking-wide">Seller Mode</CardTitle>
-          <CardDescription>
-            Enable your seller dashboard and features
-          </CardDescription>
-          <CardAction>
-            <Button
-              onClick={() => setOpen(true)}
-              disabled={data.exists}
-              size={`sm`}
-            >
-              {data.exists && <CheckIcon className="size-4" />}
-              {data.exists ? "Activated" : "Activate"}
-            </Button>
-          </CardAction>
-        </CardHeader>
+      <div className="flex flex-col gap-y-2">
+        <Card className="shadow-none">
+          <CardHeader>
+            <CardTitle className="text-xl tracking-wide">Seller Mode</CardTitle>
+            <CardDescription>
+              Enable your seller dashboard and features
+            </CardDescription>
+            <CardAction>
+              <Button
+                onClick={() => setOpen(true)}
+                disabled={data.exists}
+                size={`sm`}
+              >
+                {data.exists && <CheckIcon className="size-4" />}
+                {data.exists ? "Activated" : "Activate"}
+              </Button>
+            </CardAction>
+          </CardHeader>
+          <Separator />
+          <CardContent>
+            <p>Card Content</p>
+          </CardContent>
+          <CardFooter>
+            <p>Card Footer</p>
+          </CardFooter>
+        </Card>
 
-        <Separator />
+        <Card className="shadow-none w-full">
+          <CardHeader>
+            <CardTitle className="text-xl tracking-wide">
+              Payment Details
+            </CardTitle>
+            <CardDescription>
+              Edit and manage your saved payment information.
+            </CardDescription>
+            <CardAction>
+              <Button
+                onClick={() => setOpen(true)}
+                disabled={data.exists}
+                size={`sm`}
+              >
+                {data.exists && <CheckIcon className="size-4" />}
+                {data.exists ? "Activated" : "Activate"}
+              </Button>
+            </CardAction>
+          </CardHeader>
 
-        <CardContent>
-          <fieldset disabled={data.exists}>
-            <div className="space-y-8">
-              {/* UPI Section */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-muted-foreground">
-                  UPI Details
-                </h3>
-                <div className="space-y-2">
-                  <Label htmlFor="upi" className="font-medium">
-                    UPI ID
-                  </Label>
-                  <Input
-                    value={data.exists ? data.account.upiId : ""}
-                    id="upi"
-                    readOnly
-                    placeholder="Enter your UPI ID"
-                    className="w-[400px]"
-                  />
+          <Separator />
+
+          <CardContent>
+            <fieldset disabled={data.exists}>
+              <div className="space-y-8">
+                {/* UPI Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-muted-foreground">
+                    UPI Details
+                  </h3>
+                  <div className="space-y-2">
+                    <Label htmlFor="upi" className="font-medium">
+                      UPI ID
+                    </Label>
+                    <Input
+                      value={data.exists ? data.account.upiId : ""}
+                      id="upi"
+                      readOnly
+                      placeholder="Enter your UPI ID"
+                      className="w-[400px]"
+                    />
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Bank Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-muted-foreground">
+                    Bank Account Details
+                  </h3>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="accountHolder" className="font-medium">
+                      Account Holder Name
+                    </Label>
+                    <Input
+                      value={
+                        data.exists ? data.account.bankAccountHolderName : ""
+                      }
+                      id="accountHolder"
+                      readOnly
+                      placeholder="Enter account holder name"
+                      className="w-[400px]"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="accountNumber" className="font-medium">
+                      Account Number
+                    </Label>
+                    <Input
+                      readOnly
+                      value={data.exists ? data.account.accountNumber : ""}
+                      id="accountNumber"
+                      placeholder="Enter bank account number"
+                      className="w-[400px]"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="ifsc" className="font-medium">
+                      IFSC Code
+                    </Label>
+                    <Input
+                      readOnly
+                      value={data.exists ? data.account.ifscCode : ""}
+                      id="ifsc"
+                      placeholder="Enter IFSC code"
+                      className="w-[400px]"
+                    />
+                  </div>
                 </div>
               </div>
+            </fieldset>
+          </CardContent>
 
-              <Separator />
+          <CardFooter />
+        </Card>
 
-              {/* Bank Section */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-muted-foreground">
-                  Bank Account Details
-                </h3>
-
-                <div className="space-y-2">
-                  <Label htmlFor="accountHolder" className="font-medium">
-                    Account Holder Name
-                  </Label>
-                  <Input
-                    value={
-                      data.exists ? data.account.bankAccountHolderName : ""
-                    }
-                    id="accountHolder"
-                    readOnly
-                    placeholder="Enter account holder name"
-                    className="w-[400px]"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="accountNumber" className="font-medium">
-                    Account Number
-                  </Label>
-                  <Input
-                    readOnly
-                    value={data.exists ? data.account.accountNumber : ""}
-                    id="accountNumber"
-                    placeholder="Enter bank account number"
-                    className="w-[400px]"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="ifsc" className="font-medium">
-                    IFSC Code
-                  </Label>
-                  <Input
-                    readOnly
-                    value={data.exists ? data.account.ifscCode : ""}
-                    id="ifsc"
-                    placeholder="Enter IFSC code"
-                    className="w-[400px]"
-                  />
-                </div>
-              </div>
-            </div>
-          </fieldset>
-        </CardContent>
-
-        <CardFooter />
-      </Card>
+        <Card className="shadow-none">
+          <CardHeader>
+            <CardTitle>Card Title</CardTitle>
+            <CardDescription>Card Description</CardDescription>
+            <CardAction>Card Action</CardAction>
+          </CardHeader>
+          <CardContent>
+            <p>Card Content</p>
+          </CardContent>
+          <CardFooter>
+            <p>Card Footer</p>
+          </CardFooter>
+        </Card>
+      </div>
     </>
   );
 };

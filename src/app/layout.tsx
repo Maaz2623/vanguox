@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { TRPCReactProvider } from "@/trpc/client";
 import { Toaster } from "@/components/ui/sonner";
+import { Footer } from "@/components/footer";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -21,9 +22,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppins.className} antialiased bg-gray-100`}>
+      <body
+        className={`${poppins.className} antialiased px-2 py-2 flex flex-col gap-y-1 bg-gray-100`}
+      >
         <TRPCReactProvider>
           {children} <Toaster position="top-center" />
+          <Footer />
         </TRPCReactProvider>
       </body>
     </html>
