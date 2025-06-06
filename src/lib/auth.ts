@@ -8,10 +8,10 @@ import { emailOTP } from "better-auth/plugins";
 export const auth = betterAuth({
   plugins: [
     emailOTP({
-      async sendVerificationOTP({ email, otp }) {
+      async sendVerificationOTP({ email, otp, type }) {
         sendEmail({
           to: email,
-          subject: "Verify your email address",
+          subject: `Verify your email address <${type}>`,
           text: `OTP: ${otp}`,
         });
       },
