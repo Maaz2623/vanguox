@@ -28,7 +28,9 @@ import {
 } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { CheckIcon } from "lucide-react";
+import { CheckCircle2Icon, CheckIcon } from "lucide-react";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+
 export const SellerSection = () => {
   const trpc = useTRPC();
 
@@ -241,14 +243,39 @@ const SellerAccountForm = ({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
         <fieldset disabled={loading}>
-          <DialogHeader>
-            <DialogTitle>Activate Seller Mode</DialogTitle>
-            <DialogDescription>
-              Enter your payment details to enable selling features.
-            </DialogDescription>
-          </DialogHeader>
+          <VisuallyHidden>
+            <DialogHeader>
+              <DialogTitle>Activate Seller Mode</DialogTitle>
+              <DialogDescription>
+                Enter your payment details to enable selling features.
+              </DialogDescription>
+            </DialogHeader>
+          </VisuallyHidden>
 
-          <div className="flex flex-col gap-y-4 py-4">
+          <header className="flex w-full justify-center items-center gap-x-4">
+            <div className="flex flex-col justify-center items-center">
+              <span>1</span>
+              <p className="text-center">Personal Info</p>
+            </div>
+            <div className="w-[50px] mx-3">
+              <Separator orientation="horizontal" className="" />
+            </div>
+
+            <div className="flex flex-col justify-center items-center">
+              <span><CheckCircle2Icon /></span>
+              <p className="text-center">Account Info</p>
+            </div>
+
+            <div className="w-[50px] mx-3">
+              <Separator orientation="horizontal" className="" />
+            </div>
+            <div className="flex flex-col justify-center items-center">
+              <span>3</span>
+              <p className="text-center">Payment Info</p>
+            </div>
+          </header>
+
+          <div className="flex-col hidden gap-y-4 py-4">
             {/* UPI Section */}
             <div className="space-y-2">
               <Label htmlFor="upi" className="font-medium">

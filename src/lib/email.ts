@@ -12,7 +12,7 @@ export async function sendEmail({
   text: string;
 }) {
   await resend.emails.send({
-    from: "Your App <no-reply@vanguox.com>", // must be a verified sender
+    from: "Vanguox <no-reply@vanguox.com>", // must be a verified sender
     to,
     subject,
     text,

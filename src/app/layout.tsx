@@ -22,12 +22,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${poppins.className} antialiased px-2 py-2 flex flex-col gap-y-1 bg-gray-100`}
-      >
+      <body className={`${poppins.className} antialiased bg-gray-100`}>
         <TRPCReactProvider>
-          {children} <Toaster position="top-center" />
-          <Footer />
+          <div className="min-h-screen flex flex-col px-2 py-2 gap-y-1">
+            {/* Main content grows to push footer down */}
+            <main className="flex-1">{children}</main>
+
+            {/* Sticky footer at bottom */}
+            <Footer />
+          </div>
+
+          <Toaster position="top-center" />
         </TRPCReactProvider>
       </body>
     </html>

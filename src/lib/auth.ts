@@ -3,19 +3,20 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/db"; // your drizzle instance
 import * as schema from "@/db/schema";
 import { sendEmail } from "./email";
+import { emailOTP } from "better-auth/plugins";
 
 export const auth = betterAuth({
-  emailVerification: {
-    autoSignInAfterVerification: true,
-    sendOnSignUp: true,
-    sendVerificationEmail: async ({ user, url }) => {
-      await sendEmail({
-        to: user.email,
-        subject: "Verify your email address",
-        text: `Click the link to verify your email: ${url}`,
-      });
-    },
-  },
+  plugins: [
+    emailOTP({
+      async sendVerificationOTP({ email, otp }) {
+        sendEmail({
+          to: email,
+          subject: "Verify your email address",
+          text: `OTP: ${otp}`,
+        });
+      },
+    }),
+  ],
   emailAndPassword: {
     requireEmailVerification: true,
     enabled: true,
