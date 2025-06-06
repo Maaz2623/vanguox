@@ -9,11 +9,13 @@ export const auth = betterAuth({
   plugins: [
     emailOTP({
       async sendVerificationOTP({ email, otp, type }) {
-        sendEmail({
-          to: email,
-          subject: `Verify your email address <${type}>`,
-          text: `OTP: ${otp}`,
-        });
+        if (type === "email-verification") {
+          await sendEmail({
+            to: email,
+            subject: `Verify your email address <${type}>`,
+            text: `OTP: ${otp}`,
+          });
+        }
       },
     }),
   ],
