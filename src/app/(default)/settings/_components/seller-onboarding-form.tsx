@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion, AnimatePresence } from "framer-motion";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle2Icon } from "lucide-react";
+import { CheckCircle2Icon, PartyPopperIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -30,6 +30,8 @@ export const SellerOnboardingForm = () => {
   ];
 
   const currentStep = steps[step];
+
+  console.log(step);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -59,43 +61,98 @@ export const SellerOnboardingForm = () => {
               exit={{ x: direction === 1 ? -100 : 100, opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              {currentStep.component}
+              {step !== 3 && currentStep.component}
             </motion.div>
           </AnimatePresence>
         </div>
-
-        <DialogFooter>
-          <Button
-            onClick={() => {
-              setDirection(-1);
-              setStep((prev) => Math.max(prev - 1, 0) as 0 | 1 | 2 | 3 | 4);
-            }}
-            disabled={step === 0}
-            variant={`outline`}
-          >
-            Back
-          </Button>
-
-          {step < steps.length - 1 ? (
+        {step <= 2 && (
+          <DialogFooter>
             <Button
-              variant={`outline`}
               onClick={() => {
-                setDirection(1);
-                setStep(
-                  (prev) =>
-                    Math.min(prev + 1, steps.length - 1) as 0 | 1 | 2 | 3 | 4
-                );
+                setDirection(-1);
+                setStep((prev) => Math.max(prev - 1, 0) as 0 | 1 | 2 | 3 | 4);
               }}
-              disabled={step === steps.length - 1}
+              disabled={step === 0}
+              variant={`outline`}
             >
-              Next
+              Back
             </Button>
-          ) : (
-            <Button>Confirm</Button>
-          )}
-        </DialogFooter>
+
+            {step < steps.length && step !== 2 && (
+              <Button
+                variant={`outline`}
+                onClick={() => {
+                  setDirection(1);
+                  setStep(
+                    (prev) =>
+                      Math.min(prev + 1, steps.length - 1) as 0 | 1 | 2 | 3 | 4
+                  );
+                }}
+                disabled={step === steps.length}
+              >
+                Next
+              </Button>
+            )}
+            {step === 2 && (
+              <Button
+                onClick={() => {
+                  setStep(3);
+                }}
+              >
+                Confirm
+              </Button>
+            )}
+          </DialogFooter>
+        )}
+        {step > 2 && <CongratulationsSection />}
       </DialogContent>
     </Dialog>
+  );
+};
+
+const CongratulationsSection = () => {
+  return (
+    <motion.div
+      className="flex flex-col items-center justify-center text-center gap-6 p-6"
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+    >
+      <motion.div
+        initial={{ rotate: -15 }}
+        animate={{ rotate: [0, -10, 10, -10, 10, 0] }}
+        transition={{ duration: 1.5, delay: 0.3 }}
+      >
+        <PartyPopperIcon className="w-16 h-16 text-green-500" />
+      </motion.div>
+
+      <motion.h2
+        className="text-3xl font-bold text-green-700"
+        initial={{ y: 30, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.4, duration: 0.5 }}
+      >
+        Congratulations!
+      </motion.h2>
+
+      <motion.p
+        className="text-gray-600 max-w-md"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.6, duration: 0.4 }}
+      >
+        You've successfully completed the onboarding process. You're now ready
+        to get started!
+      </motion.p>
+
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.8 }}
+      >
+        <Button className="mt-4">Go to Dashboard</Button>
+      </motion.div>
+    </motion.div>
   );
 };
 
@@ -110,39 +167,40 @@ const OnboardingHeader = ({
     <div className="flex justify-between items-center mt-6 gap-x-6">
       {steps.map((s, idx) => (
         <React.Fragment key={idx}>
-          <div
-            className={cn(
-              "text-center flex justify-center items-center flex-col duration-100 text-base transition-colors",
-              step > idx ? "text-green-600" : "text-gray-500"
-            )}
-          >
-            <AnimatePresence mode="wait">
-              {step > idx ? (
-                <motion.div
-                  key="check"
-                  initial={{ scale: 0.5, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.5, opacity: 0 }}
-                  transition={{ duration: 0.1 }}
-                >
-                  <CheckCircle2Icon className="size-6" />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="number"
-                  initial={{ scale: 0.5, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.5, opacity: 0 }}
-                  transition={{ duration: 0.1 }}
-                  className="font-semibold"
-                >
-                  {idx + 1}
-                </motion.div>
+          {step !== 4 && (
+            <div
+              className={cn(
+                "text-center flex justify-center items-center flex-col duration-100 text-base transition-colors",
+                step > idx ? "text-green-600" : "text-gray-500"
               )}
-            </AnimatePresence>
-            <p className="mt-1">{s.title}</p>
-          </div>
-
+            >
+              <AnimatePresence mode="wait">
+                {step > idx ? (
+                  <motion.div
+                    key="check"
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.5, opacity: 0 }}
+                    transition={{ duration: 0.1 }}
+                  >
+                    <CheckCircle2Icon className="size-6" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="number"
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.5, opacity: 0 }}
+                    transition={{ duration: 0.1 }}
+                    className="font-semibold"
+                  >
+                    {idx + 1}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <p className="mt-1">{s.title}</p>
+            </div>
+          )}
           {idx < steps.length - 1 && (
             <div className="w-[50px]">
               <Separator />
