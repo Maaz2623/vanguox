@@ -12,19 +12,27 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion, AnimatePresence } from "framer-motion";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle2Icon, PartyPopperIcon } from "lucide-react";
+import { CalendarIcon, CheckCircle2Icon, PartyPopperIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import Calendar13 from "@/components/calendar-13";
 
 export const SellerOnboardingForm = () => {
   const [step, setStep] = useState<0 | 1 | 2 | 3 | 4>(0);
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [direction, setDirection] = useState<1 | -1>(1); // to determine animation direction
 
   const steps = [
-    { title: "Personal Info", component: <PersonalInfoSection /> },
+    { title: "Pan Verification", component: <PanVerificationSection /> },
     { title: "Account Info", component: <AccountInfoSection /> },
     { title: "Payment Info", component: <PaymentInfoSection /> },
   ];
@@ -212,20 +220,35 @@ const OnboardingHeader = ({
   );
 };
 
-const PersonalInfoSection = () => {
+const PanVerificationSection = () => {
+  const [date, setDate] = useState<Date | undefined>(undefined);
   return (
-    <div>
-      <h3 className="text-xl font-semibold tracking-wider">Personal Details</h3>
+    <div className="p-2">
+      <h3 className="text-xl font-semibold tracking-wider">Pan Card Details</h3>
 
-      <div className="mt-4 flex flex-col gap-y-4">
+      <div className="mt-4 flex flex-col gap-y-4 border">
         <div className="flex gap-x-3">
           <div className="flex flex-col gap-y-1">
-            <Label className="font-medium">Full Name</Label>
-            <Input className="bg-gray-100" placeholder="John Doe" />
+            <Label className="font-medium">Pan Number</Label>
+            <Input className="bg-gray-100" placeholder="ABCDE1234F" />
           </div>
-          <div className="flex flex-col gap-y-2">
+          <div className="flex flex-col gap-y-1">
             <Label className="font-medium">Phone Number</Label>
-            <Input className="bg-gray-100 " placeholder="9999955628" />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  data-empty={!date}
+                  className="data-[empty=true]:text-muted-foreground w-[280px] bg-gray-100 justify-start text-left font-normal"
+                >
+                  <CalendarIcon />
+                  {date ? format(date, "PPP") : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar13 date={date} setDate={setDate} />
+              </PopoverContent>
+            </Popover>{" "}
           </div>
         </div>
       </div>
@@ -246,7 +269,6 @@ const AccountInfoSection = () => {
           </div>
           <div className="flex flex-col gap-y-2">
             <Label className="font-medium">Phone Number</Label>
-            <Input className="bg-gray-100 " placeholder="9999955628" />
           </div>
         </div>
       </div>

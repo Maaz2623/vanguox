@@ -4,6 +4,7 @@ import "./globals.css";
 import { TRPCReactProvider } from "@/trpc/client";
 import { Toaster } from "@/components/ui/sonner";
 import { Footer } from "@/components/footer";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -24,16 +25,16 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${poppins.className} antialiased bg-gray-100`}>
         <TRPCReactProvider>
-          <div className="min-h-screen flex flex-col px-2 py-2 gap-y-1">
+          <div className="min-h-screen ">
             {/* Main content grows to push footer down */}
             <main className="flex-1">{children}</main>
 
             {/* Sticky footer at bottom */}
-            <Footer />
           </div>
 
           <Toaster position="top-center" />
         </TRPCReactProvider>
+        <Script src="/flowbite/flowbite.min.js" strategy="afterInteractive" />
       </body>
     </html>
   );
