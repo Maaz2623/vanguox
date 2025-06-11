@@ -67,11 +67,7 @@ export function StoreComboboxSelector({
 
   const router = useRouter();
 
-  const { data } = useQuery(
-    trpc.stores.getStoresByUserId.queryOptions({
-      storeName,
-    })
-  );
+  const { data } = useQuery(trpc.stores.getStoresByUserId.queryOptions());
   return (
     <>
       <Popover open={open} onOpenChange={setOpen}>
@@ -80,7 +76,7 @@ export function StoreComboboxSelector({
             variant="outline"
             role="combobox"
             className={cn(
-              "w-full border-none  flex justify-between items-center py-6 shadow-none",
+              "w-full flex justify-between items-center py-6 bg-gray-100 shadow-none border-none",
               !sidebarOpen && "pl-5",
               !sidebarOpen && "justify-center"
             )}

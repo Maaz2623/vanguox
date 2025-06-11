@@ -15,7 +15,7 @@ import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { authClient } from "@/lib/auth-client";
 import { ScrollArea } from "./ui/scroll-area";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useTRPC } from "@/trpc/client";
@@ -40,6 +40,8 @@ export const CreateStoreDialog = ({
   const [loading, setLoading] = useState(false);
 
   const mutation = useMutation(trpc.stores.createStore.mutationOptions());
+
+  const queryClient = useQueryClient();
 
   const router = useRouter();
 
@@ -76,6 +78,9 @@ export const CreateStoreDialog = ({
         },
         onSettled: () => {
           setLoading(false);
+          queryClient.invalidateQueries(
+            trpc.stores.getStoresByUserId.queryOptions()
+          );
         },
       }
     );

@@ -6,27 +6,21 @@ import { and, eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 export const storeRouter = createTRPCRouter({
-  getStoresByUserId: protectedProcedure
-    .input(
-      z.object({
-        storeName: z.string(),
-      })
-    )
-    .query(async ({ input, ctx }) => {
-      const data = await db
-        .select()
-        .from(stores)
-        .where(eq(stores.ownerId, ctx.auth.user.id));
+  getStoresByUserId: protectedProcedure.query(async ({ ctx }) => {
+    const data = await db
+      .select()
+      .from(stores)
+      .where(eq(stores.ownerId, ctx.auth.user.id));
 
-      if (data.length === 0) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "You haven't created any stores yet.",
-        });
-      }
+    if (data.length === 0) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "You haven't created any stores yet.",
+      });
+    }
 
-      return data;
-    }),
+    return data;
+  }),
   createStore: protectedProcedure
     .input(
       z.object({
