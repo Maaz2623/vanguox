@@ -8,3 +8,5 @@ export const authClient = createAuthClient({
       ? "https://vanguox.com"
       : "http://localhost:3000",
 });
+
+export const { signOut } = authClient;

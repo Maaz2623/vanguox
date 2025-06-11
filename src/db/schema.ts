@@ -1,4 +1,11 @@
-import { pgTable, text, timestamp, boolean, uuid } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -80,4 +87,26 @@ export const sellerAccount = pgTable("seller_account", {
   updatedAt: timestamp("updated_at").$defaultFn(
     () => /* @__PURE__ */ new Date()
   ),
+});
+
+export const stores = pgTable("stores", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+
+  ownerId: text("owner_id")
+    .notNull()
+    .references(() => user.id, {
+      onDelete: "cascade",
+    }),
+
+  name: text("name").notNull().unique(), // enforce slug uniqueness
+
+  category: text("category").notNull(),
+
+  description: text("description").notNull(),
+
+  email: text("email").notNull(),
+
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 });

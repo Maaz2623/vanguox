@@ -4,6 +4,7 @@ import * as React from "react";
 import {
   BookOpen,
   Bot,
+  ChevronsUpDown,
   Command,
   Frame,
   LifeBuoy,
@@ -28,6 +29,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { StoreComboboxSelector } from "./store-combobox-selector";
+import { authClient } from "@/lib/auth-client";
+import { useParams } from "next/navigation";
 
 const data = {
   user: {
@@ -154,6 +157,17 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const session = authClient.useSession();
+
+  const { storeName } = useParams<{
+    storeName: string;
+  }>();
+
+  const user = {
+    name: session.data?.user?.name as string,
+    email: session.data?.user?.email as string,
+    image: session.data?.user?.image as string,
+  };
   return (
     <Sidebar collapsible="icon" variant="inset" {...props}>
       <SidebarHeader>
@@ -165,8 +179,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Acme Inc</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate font-medium capitalize">
+                    {storeName}
+                  </span>
+                  <span className="truncate text-xs">Store</span>
                 </div>
               </StoreComboboxSelector>
             </SidebarMenuButton>
@@ -179,7 +195,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser name={user.name} email={user.email} image={user.image} />{" "}
       </SidebarFooter>
     </Sidebar>
   );

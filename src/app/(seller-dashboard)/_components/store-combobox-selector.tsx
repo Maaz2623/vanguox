@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, PlusCircleIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -19,6 +20,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useSidebar } from "@/components/ui/sidebar";
+import { useStoreName } from "@/hooks/use-store-name";
+import { useParams, useRouter } from "next/navigation";
+import { CreateStoreDialog } from "@/components/create-store-dialog";
+import { useQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
 
 const frameworks = [
   {
@@ -49,52 +55,82 @@ export function StoreComboboxSelector({
   children: React.ReactNode;
 }) {
   const [open, setOpen] = React.useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
+  const { storeName } = useParams<{
+    storeName: string;
+  }>();
 
   const { open: sidebarOpen } = useSidebar();
 
+  const trpc = useTRPC();
+
+  const router = useRouter();
+
+  const { data } = useQuery(
+    trpc.stores.getStoresByUserId.queryOptions({
+      storeName,
+    })
+  );
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className="flex justify-center items-center" asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          className={cn(
-            "w-full border-none  flex justify-center items-center py-6 shadow-none",
-            !sidebarOpen && "pl-5"
-          )}
-        >
-          {children}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
-        <Command>
-          <CommandInput placeholder="Search framework..." className="h-9" />
-          <CommandList>
-            <CommandEmpty>No framework found.</CommandEmpty>
-            <CommandGroup>
-              {frameworks.map((framework) => (
-                <CommandItem
-                  key={framework.value}
-                  value={framework.value}
-                  onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue);
-                    setOpen(false);
-                  }}
+    <>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger className="flex justify-center items-center" asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            className={cn(
+              "w-full border-none  flex justify-between items-center py-6 shadow-none",
+              !sidebarOpen && "pl-5",
+              !sidebarOpen && "justify-center"
+            )}
+          >
+            {children}
+            {sidebarOpen && <ChevronsUpDown />}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[200px] p-0">
+          <Command>
+            <CommandInput placeholder="Search framework..." className="h-9" />
+            <CommandList>
+              <CommandEmpty>No framework found.</CommandEmpty>
+              <CommandGroup>
+                {data &&
+                  data.map((store) => (
+                    <CommandItem
+                      key={store.id}
+                      value={store.name}
+                      onSelect={(currentValue) => {
+                        setValue(currentValue === value ? "" : currentValue);
+                        setOpen(false);
+                        router.push(`/dashboard/${currentValue}`);
+                      }}
+                    >
+                      {store.name}
+                    </CommandItem>
+                  ))}
+              </CommandGroup>
+              <CommandSeparator />
+              <CommandGroup>
+                <CreateStoreDialog
+                  open={createDialogOpen}
+                  setOpen={setCreateDialogOpen}
                 >
-                  {framework.label}
-                  <Check
-                    className={cn(
-                      "ml-auto",
-                      value === framework.value ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+                  <CommandItem
+                    onClick={(e) => e.preventDefault()}
+                    onSelect={() => {
+                      setCreateDialogOpen(true);
+                    }}
+                  >
+                    <PlusCircleIcon />
+                    Create
+                  </CommandItem>
+                </CreateStoreDialog>
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    </>
   );
 }
