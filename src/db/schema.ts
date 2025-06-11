@@ -1,4 +1,12 @@
-import { pgTable, text, timestamp, boolean, uuid } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  uuid,
+  jsonb,
+  numeric,
+} from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -102,4 +110,46 @@ export const stores = pgTable("stores", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
+});
+
+export const products = pgTable("products", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+
+  storeId: text("store_id")
+    .notNull()
+    .references(() => user.id, {
+      onDelete: "cascade",
+    }),
+
+  name: text("name").notNull().unique(), // Ensure product name is unique
+
+  slug: text("slug").notNull().unique(), // URL-friendly name
+
+  description: text("description"),
+
+  category: text("category").notNull(),
+
+  price: numeric("price", { precision: 10, scale: 2 }).notNull(),
+
+  discount: numeric("discount", { precision: 5, scale: 2 }).default("0.00"),
+
+  inStock: boolean("in_stock").default(true).notNull(),
+
+  stockQuantity: numeric("stock_quantity", { precision: 10, scale: 0 })
+    .default("0")
+    .notNull(),
+
+  attributes: jsonb("attributes").default({}), // e.g. color, size, weight
+
+  images: jsonb("images").default([]), // array of image URLs or objects
+
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+
+  deletedAt: timestamp("deleted_at", { withTimezone: true }), // For soft delete
 });

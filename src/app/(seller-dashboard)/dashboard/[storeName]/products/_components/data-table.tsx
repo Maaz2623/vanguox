@@ -69,14 +69,32 @@ import {
 
 export const schema = z.object({
   id: z.string().uuid(),
-  ownerId: z.string().uuid(),
+  storeId: z.string().uuid(),
   name: z.string(),
+  slug: z.string(),
+  description: z.string().optional(),
   category: z.string(),
-  description: z.string(),
-  email: z.string().email(),
-  createdAt: z.string().datetime({ offset: true }), // ISO 8601 with timezone
+  price: z.union([
+    z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
+    z.number(),
+  ]),
+  discount: z
+    .union([
+      z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid discount format"),
+      z.number(),
+    ])
+    .optional(),
+  inStock: z.boolean(),
+  stockQuantity: z.union([
+    z.string().regex(/^\d+$/, "Invalid stock quantity"),
+    z.number().int(),
+  ]),
+  attributes: z.record(z.any()).optional(), // can be made stricter if you have fixed keys
+  images: z.array(z.string().url()).optional(),
+  createdAt: z.string().datetime({ offset: true }),
+  updatedAt: z.string().datetime({ offset: true }),
+  deletedAt: z.string().datetime({ offset: true }).nullable().optional(),
 });
-
 const columns: ColumnDef<z.infer<typeof schema>>[] = [
   {
     id: "select",
@@ -120,21 +138,48 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     ),
   },
   {
-    accessorKey: "email",
-    header: "Email",
-    cell: ({ row }) => (
-      <div className="truncate text-sm text-muted-foreground max-w-[200px]">
-        {row.original.email}
-      </div>
-    ),
-  },
-  {
     accessorKey: "description",
     header: "Description",
     cell: ({ row }) => (
       <div className="text-muted-foreground max-w-[250px] truncate text-xs">
-        {row.original.description}
+        {row.original.description || "-"}
       </div>
+    ),
+  },
+  {
+    accessorKey: "price",
+    header: "Price",
+    cell: ({ row }) => (
+      <div className="text-right text-sm">
+        ₹{Number(row.original.price).toFixed(2)}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "discount",
+    header: "Discount",
+    cell: ({ row }) => (
+      <div className="text-right text-sm text-muted-foreground">
+        {row.original.discount
+          ? `${Number(row.original.discount).toFixed(2)}%`
+          : "-"}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "inStock",
+    header: "In Stock",
+    cell: ({ row }) => (
+      <Badge variant={row.original.inStock ? "default" : "destructive"}>
+        {row.original.inStock ? "Yes" : "No"}
+      </Badge>
+    ),
+  },
+  {
+    accessorKey: "stockQuantity",
+    header: "Stock",
+    cell: ({ row }) => (
+      <div className="text-right text-sm">{row.original.stockQuantity}</div>
     ),
   },
   {
@@ -149,6 +194,18 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
       );
     },
   },
+  // {
+  //   accessorKey: "updatedAt",
+  //   header: "Updated",
+  //   cell: ({ row }) => {
+  //     const date = new Date(row.original.updatedAt);
+  //     return (
+  //       <div className="text-right text-sm text-muted-foreground">
+  //         {date.toLocaleDateString()}
+  //       </div>
+  //     );
+  //   },
+  // },
   {
     id: "actions",
     cell: () => (
@@ -220,8 +277,8 @@ export function DataTable({
 
   return (
     <div className="w-full flex-col justify-start gap-6">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center mb-3">
+        <div className="flex items-center justify-between w-full gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
@@ -258,7 +315,7 @@ export function DataTable({
           </DropdownMenu>
           <Button variant="default" size="sm">
             <IconPlus />
-            <span className="hidden lg:inline">Add Section</span>
+            <span className="">Add Product</span>
           </Button>
         </div>
       </div>
@@ -391,7 +448,6 @@ export function DataTable({
     </div>
   );
 }
-
 function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
   const isMobile = useIsMobile();
 
@@ -405,33 +461,89 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
       <DrawerContent>
         <DrawerHeader className="gap-1">
           <DrawerTitle>{item.name}</DrawerTitle>
-          <DrawerDescription>Store details and contact info</DrawerDescription>
+          <DrawerDescription>Store details and metadata</DrawerDescription>
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
           <form className="flex flex-col gap-4">
             <div className="flex flex-col gap-3">
               <Label htmlFor="name">Store Name</Label>
-              <Input id="name" defaultValue={item.name} />
+              <Input id="name" defaultValue={item.name} readOnly />
             </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-3">
                 <Label htmlFor="category">Category</Label>
-                <Input id="category" defaultValue={item.category} />
+                <Input id="category" defaultValue={item.category} readOnly />
               </div>
               <div className="flex flex-col gap-3">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" defaultValue={item.email} />
+                <Label htmlFor="slug">Slug</Label>
+                <Input id="slug" defaultValue={item.slug} readOnly />
               </div>
             </div>
+
             <div className="flex flex-col gap-3">
               <Label htmlFor="description">Description</Label>
-              <Input id="description" defaultValue={item.description} />
+              <Input
+                id="description"
+                defaultValue={item.description || "—"}
+                readOnly
+              />
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-3">
+                <Label htmlFor="price">Price</Label>
+                <Input
+                  id="price"
+                  defaultValue={`₹${Number(item.price).toFixed(2)}`}
+                  readOnly
+                />
+              </div>
+              <div className="flex flex-col gap-3">
+                <Label htmlFor="discount">Discount</Label>
+                <Input
+                  id="discount"
+                  defaultValue={
+                    item.discount ? `${Number(item.discount).toFixed(2)}%` : "—"
+                  }
+                  readOnly
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-3">
+                <Label htmlFor="stockQuantity">Stock</Label>
+                <Input
+                  id="stockQuantity"
+                  defaultValue={String(item.stockQuantity)}
+                  readOnly
+                />
+              </div>
+              <div className="flex flex-col gap-3">
+                <Label htmlFor="inStock">In Stock</Label>
+                <Input
+                  id="inStock"
+                  defaultValue={item.inStock ? "Yes" : "No"}
+                  readOnly
+                />
+              </div>
+            </div>
+
             <div className="flex flex-col gap-3">
               <Label htmlFor="createdAt">Created At</Label>
               <Input
                 id="createdAt"
                 defaultValue={new Date(item.createdAt).toLocaleString()}
+                readOnly
+              />
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="updatedAt">Updated At</Label>
+              <Input
+                id="updatedAt"
+                defaultValue={new Date(item.updatedAt).toLocaleString()}
                 readOnly
               />
             </div>
