@@ -1,89 +1,69 @@
-"use client"
+"use client";
 
 import {
-  Folder,
-  MoreHorizontal,
-  Share,
-  Trash2,
   type LucideIcon,
-} from "lucide-react"
+  LoaderIcon,
+} from "lucide-react";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 
 export function NavProjects({
   projects,
 }: {
   projects: {
-    name: string
-    url: string
-    icon: LucideIcon
-  }[]
+    name: string;
+    url: string;
+    icon: LucideIcon;
+  }[];
 }) {
-  const { isMobile } = useSidebar()
-
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [loadingUrl, setLoadingUrl] = useState("");
   return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+    <SidebarGroup>
       <SidebarGroupLabel>Projects</SidebarGroupLabel>
       <SidebarMenu>
-        {projects.map((item) => (
-          <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
-              <a href={item.url}>
-                <item.icon />
-                <span>{item.name}</span>
-              </a>
-            </SidebarMenuButton>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuAction showOnHover>
-                  <MoreHorizontal />
-                  <span className="sr-only">More</span>
-                </SidebarMenuAction>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-48"
-                side={isMobile ? "bottom" : "right"}
-                align={isMobile ? "end" : "start"}
+        {projects.map((item) => {
+          const isActive = item.url === pathname;
+
+          return (
+            <SidebarMenuItem key={item.name}>
+              <SidebarMenuButton
+                onClick={() => {
+                  if (item.url !== pathname) {
+                    setLoadingUrl(item.url);
+                    startTransition(() => {
+                      router.push(item.url);
+                    });
+                  }
+                }}
+                className={cn(
+                  "justify-between",
+                  isActive && "bg-gray-100 text-blue-600 hover:text-blue-600"
+                )}
               >
-                <DropdownMenuItem>
-                  <Folder className="text-muted-foreground" />
-                  <span>View Project</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Share className="text-muted-foreground" />
-                  <span>Share Project</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Trash2 className="text-muted-foreground" />
-                  <span>Delete Project</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        ))}
-        <SidebarMenuItem>
-          <SidebarMenuButton>
-            <MoreHorizontal />
-            <span>More</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
+                <div className="flex items-center gap-2">
+                  <item.icon className="w-4 h-4" />
+                  <span>{item.name}</span>
+                </div>
+                {isPending && loadingUrl === item.url && (
+                  <LoaderIcon className="w-4 h-4 animate-spin text-blue-600" />
+                )}
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          );
+        })}
       </SidebarMenu>
     </SidebarGroup>
-  )
+  );
 }
