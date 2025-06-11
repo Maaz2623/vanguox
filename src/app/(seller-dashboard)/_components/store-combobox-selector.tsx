@@ -51,7 +51,7 @@ export function StoreComboboxSelector({
             className={cn(
               "w-full flex justify-between items-center py-6 bg-gray-100 shadow-none border-none",
               !sidebarOpen && "pl-5",
-              !sidebarOpen && "justify-center"
+              !sidebarOpen && "justify-center bg-transparent"
             )}
           >
             {children}
