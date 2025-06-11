@@ -15,7 +15,7 @@ import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { authClient } from "@/lib/auth-client";
 import { ScrollArea } from "./ui/scroll-area";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useTRPC } from "@/trpc/client";
@@ -96,8 +96,8 @@ export const CreateStoreDialog = ({
               🚀 Launch Your Dream Store!
             </DialogTitle>
             <DialogDescription>
-              Let's get started with just a few quick details. Your journey to
-              success begins here 🌟
+              Let&apos;s get started with just a few quick details. Your journey
+              to success begins here 🌟
             </DialogDescription>
           </DialogHeader>
 

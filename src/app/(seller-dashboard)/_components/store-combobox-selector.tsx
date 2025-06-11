@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronsUpDown, PlusCircleIcon } from "lucide-react";
+import { ChevronsUpDown, PlusCircleIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -20,34 +20,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useSidebar } from "@/components/ui/sidebar";
-import { useStoreName } from "@/hooks/use-store-name";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { CreateStoreDialog } from "@/components/create-store-dialog";
 import { useQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
-
-const frameworks = [
-  {
-    value: "next.js",
-    label: "Next.js",
-  },
-  {
-    value: "sveltekit",
-    label: "SvelteKit",
-  },
-  {
-    value: "nuxt.js",
-    label: "Nuxt.js",
-  },
-  {
-    value: "remix",
-    label: "Remix",
-  },
-  {
-    value: "astro",
-    label: "Astro",
-  },
-];
 
 export function StoreComboboxSelector({
   children,
@@ -57,9 +33,6 @@ export function StoreComboboxSelector({
   const [open, setOpen] = React.useState(false);
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
-  const { storeName } = useParams<{
-    storeName: string;
-  }>();
 
   const { open: sidebarOpen } = useSidebar();
 

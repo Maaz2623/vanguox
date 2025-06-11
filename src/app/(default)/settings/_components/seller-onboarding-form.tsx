@@ -23,7 +23,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
 import Calendar13 from "@/components/calendar-13";
 
 export const SellerOnboardingForm = () => {
@@ -149,8 +148,8 @@ const CongratulationsSection = () => {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.6, duration: 0.4 }}
       >
-        You've successfully completed the onboarding process. You're now ready
-        to get started!
+        You&apos;ve successfully completed the onboarding process. You&apos;re
+        now ready to get started
       </motion.p>
 
       <motion.div

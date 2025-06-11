@@ -4,7 +4,6 @@ import * as React from "react";
 import {
   BookOpen,
   Bot,
-  ChevronsUpDown,
   Command,
   Frame,
   LifeBuoy,

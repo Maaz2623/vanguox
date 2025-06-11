@@ -10,7 +10,7 @@ export default function Calendar13({
   date: Date | undefined;
   setDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
 }) {
-  const [dropdown, setDropdown] =
+  const [dropdown] =
     React.useState<React.ComponentProps<typeof Calendar>["captionLayout"]>(
       "dropdown"
     );
