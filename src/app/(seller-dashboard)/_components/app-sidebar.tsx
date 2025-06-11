@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   BookOpen,
   Bot,
@@ -12,12 +12,12 @@ import {
   Send,
   Settings2,
   SquareTerminal,
-} from "lucide-react"
+} from "lucide-react";
 
-import { NavMain } from "@/app/(seller-dashboard)/_components/nav-main"
-import { NavProjects } from "@/app/(seller-dashboard)/_components/nav-projects"
-import { NavSecondary } from "@/app/(seller-dashboard)/_components/nav-secondary"
-import { NavUser } from "@/app/(seller-dashboard)/_components/nav-user"
+import { NavMain } from "@/app/(seller-dashboard)/_components/nav-main";
+import { NavProjects } from "@/app/(seller-dashboard)/_components/nav-projects";
+import { NavSecondary } from "@/app/(seller-dashboard)/_components/nav-secondary";
+import { NavUser } from "@/app/(seller-dashboard)/_components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -26,7 +26,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
+import { StoreComboboxSelector } from "./store-combobox-selector";
 
 const data = {
   user: {
@@ -150,16 +151,16 @@ const data = {
       icon: Map,
     },
   ],
-}
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar variant="inset" {...props}>
+    <Sidebar collapsible="icon" variant="inset" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <StoreComboboxSelector>
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <Command className="size-4" />
                 </div>
@@ -167,7 +168,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <span className="truncate font-medium">Acme Inc</span>
                   <span className="truncate text-xs">Enterprise</span>
                 </div>
-              </a>
+              </StoreComboboxSelector>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -181,5 +182,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavUser user={data.user} />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }
