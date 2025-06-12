@@ -2,6 +2,10 @@ import React from "react";
 import { ChartDemo } from "./_components/chart-demo";
 import { LongChart } from "./_components/long-chart";
 const OverviewPage = async () => {
+
+  
+
+
   return (
     <div className="gap-6 flex flex-col">
       <LongChart />

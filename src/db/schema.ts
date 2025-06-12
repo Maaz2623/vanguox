@@ -6,6 +6,7 @@ import {
   uuid,
   jsonb,
   numeric,
+  integer,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -112,6 +113,38 @@ export const stores = pgTable("stores", {
     .notNull(),
 });
 
+export const sizes = pgTable("sizes", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+
+  productId: uuid("product_id")
+    .notNull()
+    .references(() => products.id, {
+      onDelete: "cascade",
+    }),
+
+  name: text("name").notNull(), // e.g., "Small", "Large"
+  value: text("value").notNull(), // e.g., "S", "L"
+
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const colors = pgTable("colors", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+
+  productId: uuid("product_id")
+    .notNull()
+    .references(() => products.id, {
+      onDelete: "cascade",
+    }),
+
+  name: text("name").notNull(),
+  value: text("value").notNull(),
+
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
 export const products = pgTable("products", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
 
@@ -123,23 +156,15 @@ export const products = pgTable("products", {
 
   name: text("name").notNull().unique(), // Ensure product name is unique
 
-  slug: text("slug").notNull().unique(), // URL-friendly name
-
   description: text("description"),
 
   category: text("category").notNull(),
 
   price: numeric("price", { precision: 10, scale: 2 }).notNull(),
 
-  discount: numeric("discount", { precision: 5, scale: 2 }).default("0.00"),
-
-  inStock: boolean("in_stock").default(true).notNull(),
-
   stockQuantity: numeric("stock_quantity", { precision: 10, scale: 0 })
     .default("0")
     .notNull(),
-
-  attributes: jsonb("attributes").default({}), // e.g. color, size, weight
 
   images: jsonb("images").default([]), // array of image URLs or objects
 
@@ -152,4 +177,20 @@ export const products = pgTable("products", {
     .notNull(),
 
   deletedAt: timestamp("deleted_at", { withTimezone: true }), // For soft delete
+});
+
+export const productImages = pgTable("product_images", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+
+  productId: uuid("product_id")
+    .notNull()
+    .references(() => products.id, {
+      onDelete: "cascade",
+    }),
+
+  url: text("url").notNull(), // direct link to the image (S3, Cloudinary, etc.)
+  alt: text("alt").default(""), // alternative text for accessibility / SEO
+  priority: integer("priority").default(0), // used for ordering images
+
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
