@@ -315,8 +315,8 @@ export function DataTable({ storeName }: { storeName: string }) {
         </div>
 
         <div className="relative flex flex-col gap-4 overflow-auto">
-          <div className="overflow-hidden rounded-lg border">
-            <Table>
+          <div className="overflow-hidden rounded-lg border ">
+            <Table className="">
               <TableHeader className="bg-muted sticky top-0 z-10">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
@@ -333,10 +333,10 @@ export function DataTable({ storeName }: { storeName: string }) {
                   </TableRow>
                 ))}
               </TableHeader>
-              <TableBody className="**:data-[slot=table-cell]:first:w-8">
+              <TableBody className="**:data-[slot=table-cell]:first:w-8 ">
                 {table.getRowModel().rows?.length ? (
                   table.getRowModel().rows.map((row) => (
-                    <TableRow key={row.id}>
+                    <TableRow key={row.id} className="">
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>
                           {flexRender(

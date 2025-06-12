@@ -6,6 +6,31 @@ import { db } from "@/db";
 import { TRPCError } from "@trpc/server";
 
 export const productsRouter = createTRPCRouter({
+  getProducts: protectedProcedure.query(async () => {
+    const productsList = await db.select().from(products);
+
+    const formattedProducts = await Promise.all(
+      productsList.map(async (product) => {
+        const [productSizes, productColors, images] = await Promise.all([
+          db.select().from(sizes).where(eq(sizes.productId, product.id)),
+          db.select().from(colors).where(eq(colors.productId, product.id)),
+          db
+            .select()
+            .from(productImages)
+            .where(eq(productImages.productId, product.id)),
+        ]);
+
+        return {
+          ...product,
+          sizes: productSizes ?? [],
+          colors: productColors ?? [],
+          images: images ?? [],
+        };
+      })
+    );
+
+    return formattedProducts;
+  }),
   getProductDetails: protectedProcedure
     .input(
       z.object({
