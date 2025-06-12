@@ -20,15 +20,17 @@ import { Separator } from "./ui/separator";
 import Image from "next/image";
 import { toast } from "sonner";
 import { useTRPC } from "@/trpc/client";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useUploadThing } from "@/lib/uploadthing";
 
 export function CreateProductDialog({
   open,
   setOpen,
+  storeName,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
+  storeName: string;
 }) {
   const [message, setMessage] = useState("🚀 Create");
 
@@ -99,6 +101,8 @@ export function CreateProductDialog({
     },
   });
 
+  const queryClient = useQueryClient();
+
   const handleCreate = async () => {
     setLoading(true);
 
@@ -120,7 +124,7 @@ export function CreateProductDialog({
     setMessage("Creating product");
     mutation.mutate(
       {
-        storeName: "next", // replace with actual store ID
+        storeName: storeName, // replace with actual store ID
         name: name,
         description: description,
         category: category,
@@ -141,9 +145,14 @@ export function CreateProductDialog({
         images: uploadedImages,
       },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
           toast.success("Product created.");
           handleClear(); // 👈 clear the form fields here
+          queryClient.invalidateQueries(
+            trpc.products.getProductsByStoreName.queryOptions({
+              storeName: data.name,
+            })
+          );
         },
         onError: (error) => {
           toast.error(error.message);
@@ -170,7 +179,7 @@ export function CreateProductDialog({
             </DialogDescription>
           </DialogHeader>
 
-          <ScrollArea className="max-h-[60vh] border-y shadow-inner mt-3 custom-scroll overflow-y-auto pr-2">
+          <ScrollArea className="max-h-[60vh]  shadow-inner mt-3 custom-scroll overflow-y-auto pr-2">
             <div className="space-y-6 mt-4 pb-4 p-1">
               <div className="flex flex-col gap-y-1.5">
                 <Label htmlFor="name">📛 Product Name</Label>

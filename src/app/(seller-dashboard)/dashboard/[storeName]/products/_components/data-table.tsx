@@ -67,35 +67,21 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CreateProductDialog } from "@/components/create-product-dialog";
+import { useTRPC } from "@/trpc/client";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 export const schema = z.object({
-  id: z.string().uuid(),
-  storeId: z.string().uuid(),
+  id: z.string(),
   name: z.string(),
-  slug: z.string(),
-  description: z.string().optional(),
+  createdAt: z.string().nullable(),
+  updatedAt: z.string().nullable(),
   category: z.string(),
-  price: z.union([
-    z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
-    z.number(),
-  ]),
-  discount: z
-    .union([
-      z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid discount format"),
-      z.number(),
-    ])
-    .optional(),
-  inStock: z.boolean(),
-  stockQuantity: z.union([
-    z.string().regex(/^\d+$/, "Invalid stock quantity"),
-    z.number().int(),
-  ]),
-  attributes: z.record(z.any()).optional(), // can be made stricter if you have fixed keys
-  images: z.array(z.string().url()).optional(),
-  createdAt: z.string().datetime({ offset: true }),
-  updatedAt: z.string().datetime({ offset: true }),
-  deletedAt: z.string().datetime({ offset: true }).nullable().optional(),
+  description: z.string().nullable(),
+  storeId: z.string(),
+  price: z.string(), // because it's from a numeric column
+  stockQuantity: z.number(),
 });
+
 const columns: ColumnDef<z.infer<typeof schema>>[] = [
   {
     id: "select",
@@ -157,26 +143,6 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     ),
   },
   {
-    accessorKey: "discount",
-    header: "Discount",
-    cell: ({ row }) => (
-      <div className="text-right text-sm text-muted-foreground">
-        {row.original.discount
-          ? `${Number(row.original.discount).toFixed(2)}%`
-          : "-"}
-      </div>
-    ),
-  },
-  {
-    accessorKey: "inStock",
-    header: "In Stock",
-    cell: ({ row }) => (
-      <Badge variant={row.original.inStock ? "default" : "destructive"}>
-        {row.original.inStock ? "Yes" : "No"}
-      </Badge>
-    ),
-  },
-  {
     accessorKey: "stockQuantity",
     header: "Stock",
     cell: ({ row }) => (
@@ -187,22 +153,27 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     accessorKey: "createdAt",
     header: "Created",
     cell: ({ row }) => {
-      const date = new Date(row.original.createdAt);
+      const date = row.original.createdAt
+        ? new Date(row.original.createdAt)
+        : null;
       return (
         <div className="text-right text-sm text-muted-foreground">
-          {date.toLocaleDateString()}
+          {date ? date.toLocaleDateString() : "-"}
         </div>
       );
     },
   },
+  // Optional:
   // {
   //   accessorKey: "updatedAt",
   //   header: "Updated",
   //   cell: ({ row }) => {
-  //     const date = new Date(row.original.updatedAt);
+  //     const date = row.original.updatedAt
+  //       ? new Date(row.original.updatedAt)
+  //       : null;
   //     return (
   //       <div className="text-right text-sm text-muted-foreground">
-  //         {date.toLocaleDateString()}
+  //         {date ? date.toLocaleDateString() : "-"}
   //       </div>
   //     );
   //   },
@@ -233,12 +204,16 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
   },
 ];
 
-export function DataTable({
-  data: initialData,
-}: {
-  data: z.infer<typeof schema>[];
-}) {
-  const [data] = React.useState(() => initialData);
+export function DataTable({ storeName }: { storeName: string }) {
+  const trpc = useTRPC();
+
+  const { data: products } = useSuspenseQuery(
+    trpc.products.getProductsByStoreName.queryOptions({
+      storeName,
+    })
+  );
+
+  const [data] = React.useState(() => products);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -282,6 +257,7 @@ export function DataTable({
   return (
     <>
       <CreateProductDialog
+        storeName={storeName}
         open={createProductDialogOpen}
         setOpen={setCreateProductDialogOpen}
       />
@@ -462,7 +438,8 @@ export function DataTable({
     </>
   );
 }
-function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
+
+export function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
   const isMobile = useIsMobile();
 
   return (
@@ -489,10 +466,6 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                 <Label htmlFor="category">Category</Label>
                 <Input id="category" defaultValue={item.category} readOnly />
               </div>
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="slug">Slug</Label>
-                <Input id="slug" defaultValue={item.slug} readOnly />
-              </div>
             </div>
 
             <div className="flex flex-col gap-3">
@@ -513,16 +486,6 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                   readOnly
                 />
               </div>
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="discount">Discount</Label>
-                <Input
-                  id="discount"
-                  defaultValue={
-                    item.discount ? `${Number(item.discount).toFixed(2)}%` : "—"
-                  }
-                  readOnly
-                />
-              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -534,21 +497,17 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                   readOnly
                 />
               </div>
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="inStock">In Stock</Label>
-                <Input
-                  id="inStock"
-                  defaultValue={item.inStock ? "Yes" : "No"}
-                  readOnly
-                />
-              </div>
             </div>
 
             <div className="flex flex-col gap-3">
               <Label htmlFor="createdAt">Created At</Label>
               <Input
                 id="createdAt"
-                defaultValue={new Date(item.createdAt).toLocaleString()}
+                defaultValue={
+                  item.createdAt
+                    ? new Date(item.createdAt).toLocaleString()
+                    : "—"
+                }
                 readOnly
               />
             </div>
@@ -557,7 +516,11 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
               <Label htmlFor="updatedAt">Updated At</Label>
               <Input
                 id="updatedAt"
-                defaultValue={new Date(item.updatedAt).toLocaleString()}
+                defaultValue={
+                  item.updatedAt
+                    ? new Date(item.updatedAt).toLocaleString()
+                    : "—"
+                }
                 readOnly
               />
             </div>

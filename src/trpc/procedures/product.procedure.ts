@@ -1,11 +1,46 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../init";
 import { products, sizes, colors, productImages, stores } from "@/db/schema"; // adjust import paths
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { TRPCError } from "@trpc/server";
 
 export const productsRouter = createTRPCRouter({
+  getProductsByStoreName: protectedProcedure
+    .input(
+      z.object({
+        storeName: z.string(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const [store] = await db
+        .select()
+        .from(stores)
+        .where(
+          and(
+            eq(stores.name, input.storeName),
+            eq(stores.ownerId, ctx.auth.user.id)
+          )
+        );
+
+      if (!store) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Store not found.",
+        });
+      }
+
+      const data = await db
+        .select()
+        .from(products)
+        .where(eq(products.storeId, store.id));
+
+      if (!data.length) {
+        return [];
+      }
+
+      return data;
+    }),
   createProduct: protectedProcedure
     .input(
       z.object({
@@ -86,6 +121,6 @@ export const productsRouter = createTRPCRouter({
           }))
         );
       }
-      return productId;
+      return store;
     }),
 });
