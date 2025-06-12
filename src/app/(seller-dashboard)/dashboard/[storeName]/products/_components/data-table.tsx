@@ -68,7 +68,10 @@ import {
 } from "@/components/ui/table";
 import { CreateProductDialog } from "@/components/create-product-dialog";
 import { useTRPC } from "@/trpc/client";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const schema = z.object({
   id: z.string(),
@@ -128,7 +131,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     accessorKey: "description",
     header: "Description",
     cell: ({ row }) => (
-      <div className="text-muted-foreground max-w-[250px] truncate text-xs">
+      <div className="text-muted-foreground max-w-[250px]  truncate text-xs">
         {row.original.description || "-"}
       </div>
     ),
@@ -137,7 +140,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     accessorKey: "price",
     header: "Price",
     cell: ({ row }) => (
-      <div className="text-right text-sm">
+      <div className="text-start text-sm ">
         ₹{Number(row.original.price).toFixed(2)}
       </div>
     ),
@@ -146,7 +149,9 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     accessorKey: "stockQuantity",
     header: "Stock",
     cell: ({ row }) => (
-      <div className="text-right text-sm">{row.original.stockQuantity}</div>
+      <div className="text-start pl-2 text-sm w-20">
+        {row.original.stockQuantity}
+      </div>
     ),
   },
   {
@@ -157,7 +162,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
         ? new Date(row.original.createdAt)
         : null;
       return (
-        <div className="text-right text-sm text-muted-foreground">
+        <div className="text-start text-sm text-muted-foreground">
           {date ? date.toLocaleDateString() : "-"}
         </div>
       );
@@ -440,6 +445,14 @@ export function DataTable({ storeName }: { storeName: string }) {
 }
 
 export function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
+  const trpc = useTRPC();
+
+  const { data: product, isLoading } = useQuery(
+    trpc.products.getProductDetails.queryOptions({
+      productId: item.id,
+    })
+  );
+
   const isMobile = useIsMobile();
 
   return (
@@ -451,85 +464,197 @@ export function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="gap-1">
-          <DrawerTitle>{item.name}</DrawerTitle>
-          <DrawerDescription>Store details and metadata</DrawerDescription>
+          <DrawerTitle>Product Details</DrawerTitle>
+          <DrawerDescription>Full product metadata</DrawerDescription>
         </DrawerHeader>
-        <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
-          <form className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="name">Store Name</Label>
-              <Input id="name" defaultValue={item.name} readOnly />
+        <ScrollArea className="h-[75%] shadow-inner py-4 mx-4 rounded-lg border">
+          <div className="px-4 pb-6 space-y-4">
+            <div className="space-y-2">
+              <Label>Store Name</Label>
+              {isLoading ? (
+                <Skeleton className="h-9 w-full rounded-md" />
+              ) : (
+                <Input readOnly value={product?.name || "—"} />
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="category">Category</Label>
-                <Input id="category" defaultValue={item.category} readOnly />
+              <div className="space-y-2">
+                <Label>Category</Label>
+                {isLoading ? (
+                  <Skeleton className="h-9 w-full rounded-md" />
+                ) : (
+                  <Input readOnly value={product?.category || "—"} />
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label>Price</Label>
+                {isLoading ? (
+                  <Skeleton className="h-9 w-full rounded-md" />
+                ) : (
+                  <Input
+                    readOnly
+                    value={
+                      product?.price
+                        ? `₹${Number(product.price).toFixed(2)}`
+                        : "—"
+                    }
+                  />
+                )}
               </div>
             </div>
 
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="description">Description</Label>
-              <Input
-                id="description"
-                defaultValue={item.description || "—"}
-                readOnly
-              />
+            <div className="space-y-2">
+              <Label>Description</Label>
+              {isLoading ? (
+                <Skeleton className="h-9 w-full rounded-md" />
+              ) : (
+                <Input readOnly value={product?.description || "—"} />
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="price">Price</Label>
-                <Input
-                  id="price"
-                  defaultValue={`₹${Number(item.price).toFixed(2)}`}
-                  readOnly
-                />
+              <div className="space-y-2">
+                <Label>Stock</Label>
+                {isLoading ? (
+                  <Skeleton className="h-9 w-full rounded-md" />
+                ) : (
+                  <Input readOnly value={String(product?.stockQuantity || 0)} />
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label>In Stock</Label>
+                {isLoading ? (
+                  <Skeleton className="h-9 w-full rounded-md" />
+                ) : (
+                  <Input
+                    readOnly
+                    value={product?.stockQuantity ? "Yes" : "No"}
+                  />
+                )}
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="stockQuantity">Stock</Label>
-                <Input
-                  id="stockQuantity"
-                  defaultValue={String(item.stockQuantity)}
-                  readOnly
-                />
+              <div className="space-y-2">
+                <Label>Created At</Label>
+                {isLoading ? (
+                  <Skeleton className="h-9 w-full rounded-md" />
+                ) : (
+                  <Input
+                    readOnly
+                    value={
+                      product?.createdAt
+                        ? new Date(product.createdAt).toLocaleString()
+                        : "—"
+                    }
+                  />
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label>Updated At</Label>
+                {isLoading ? (
+                  <Skeleton className="h-9 w-full rounded-md" />
+                ) : (
+                  <Input
+                    readOnly
+                    value={
+                      product?.updatedAt
+                        ? new Date(product.updatedAt).toLocaleString()
+                        : "—"
+                    }
+                  />
+                )}
               </div>
             </div>
 
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="createdAt">Created At</Label>
-              <Input
-                id="createdAt"
-                defaultValue={
-                  item.createdAt
-                    ? new Date(item.createdAt).toLocaleString()
-                    : "—"
-                }
-                readOnly
-              />
-            </div>
+            {isLoading || !product ? (
+              <>
+                <Skeleton className="h-4 w-20" />
+                <div className="flex flex-wrap gap-2">
+                  <Skeleton className="h-6 w-12 rounded-md" />
+                  <Skeleton className="h-6 w-10 rounded-md" />
+                  <Skeleton className="h-6 w-16 rounded-md" />
+                </div>
+              </>
+            ) : (
+              product?.sizes?.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Sizes</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {product.sizes.map((size) => (
+                      <Badge
+                        key={size.name}
+                      >{`${size.name}: ${size.value}`}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )
+            )}
 
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="updatedAt">Updated At</Label>
-              <Input
-                id="updatedAt"
-                defaultValue={
-                  item.updatedAt
-                    ? new Date(item.updatedAt).toLocaleString()
-                    : "—"
-                }
-                readOnly
-              />
-            </div>
-          </form>
-        </div>
+            {isLoading || !product ? (
+              <>
+                <Skeleton className="h-4 w-20" />
+                <div className="flex flex-wrap gap-2">
+                  <Skeleton className="h-6 w-12 rounded-md" />
+                  <Skeleton className="h-6 w-10 rounded-md" />
+                  <Skeleton className="h-6 w-16 rounded-md" />
+                </div>
+              </>
+            ) : (
+              product?.colors?.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Colors</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {product.colors.map((color) => (
+                      <Badge
+                        key={color.name}
+                      >{`${color.name}: ${color.value}`}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )
+            )}
+
+            {isLoading || !product ? (
+              <>
+                <Skeleton className="h-4 w-20" />
+                <div className="grid grid-cols-3 gap-2">
+                  {[...Array(3)].map((_, i) => (
+                    <Skeleton
+                      key={i}
+                      className="aspect-square w-full rounded-md"
+                    />
+                  ))}
+                </div>
+              </>
+            ) : (
+              product?.images?.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Images</Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {product.images.map((img) => (
+                      <div key={img.url} className="aspect-square relative">
+                        <Image
+                          src={img.url}
+                          alt={img.alt || "Product Image"}
+                          fill
+                          className="rounded-md object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            )}
+          </div>
+        </ScrollArea>
+
         <DrawerFooter>
-          <Button>Submit</Button>
           <DrawerClose asChild>
-            <Button variant="outline">Done</Button>
+            <Button variant="outline" className="w-full">
+              Close
+            </Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>

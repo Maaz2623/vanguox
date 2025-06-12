@@ -148,6 +148,7 @@ export function CreateProductDialog({
         onSuccess: (data) => {
           toast.success("Product created.");
           handleClear(); // 👈 clear the form fields here
+          console.log(`Fetching: ${data.name}`);
           queryClient.invalidateQueries(
             trpc.products.getProductsByStoreName.queryOptions({
               storeName: data.name,

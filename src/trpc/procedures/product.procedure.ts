@@ -6,6 +6,54 @@ import { db } from "@/db";
 import { TRPCError } from "@trpc/server";
 
 export const productsRouter = createTRPCRouter({
+  getProductDetails: protectedProcedure
+    .input(
+      z.object({
+        productId: z.string(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const [product] = await db
+        .select()
+        .from(products)
+        .where(eq(products.id, input.productId));
+
+      if (!product) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Product not found.",
+        });
+      }
+
+      const [store] = await db
+        .select()
+        .from(stores)
+        .where(eq(stores.id, product.storeId));
+
+      if (store.ownerId !== ctx.auth.user.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+        });
+      }
+
+      const [productSizes, productColors, images] = await Promise.all([
+        db.select().from(sizes).where(eq(sizes.productId, product.id)),
+        db.select().from(colors).where(eq(colors.productId, product.id)),
+        db
+          .select()
+          .from(productImages)
+          .where(eq(productImages.productId, product.id)),
+      ]);
+
+      const formattedProduct = {
+        ...product,
+        sizes: productSizes ?? [],
+        colors: productColors ?? [],
+        images: images ?? [],
+      };
+
+      return formattedProduct;
+    }),
   getProductsByStoreName: protectedProcedure
     .input(
       z.object({
