@@ -4,9 +4,8 @@ import {
   timestamp,
   boolean,
   uuid,
-  jsonb,
-  numeric,
   integer,
+  decimal,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -148,35 +147,29 @@ export const colors = pgTable("colors", {
 export const products = pgTable("products", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
 
-  storeId: text("store_id")
+  storeId: uuid("store_id")
     .notNull()
-    .references(() => user.id, {
+    .references(() => stores.id, {
       onDelete: "cascade",
     }),
 
-  name: text("name").notNull().unique(), // Ensure product name is unique
+  name: text("name").notNull(),
 
   description: text("description"),
 
   category: text("category").notNull(),
 
-  price: numeric("price", { precision: 10, scale: 2 }).notNull(),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
 
-  stockQuantity: numeric("stock_quantity", { precision: 10, scale: 0 })
-    .default("0")
-    .notNull(),
+  stockQuantity: integer("stock_quantity").notNull(),
 
-  images: jsonb("images").default([]), // array of image URLs or objects
+  createdAt: timestamp("created_at").$defaultFn(
+    () => /* @__PURE__ */ new Date()
+  ),
 
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-
-  deletedAt: timestamp("deleted_at", { withTimezone: true }), // For soft delete
+  updatedAt: timestamp("updated_at").$defaultFn(
+    () => /* @__PURE__ */ new Date()
+  ),
 });
 
 export const productImages = pgTable("product_images", {

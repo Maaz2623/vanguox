@@ -15,9 +15,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "./ui/switch";
-import { PlusCircleIcon, X } from "lucide-react";
+import { LoaderIcon, PlusCircleIcon, X } from "lucide-react";
 import { Separator } from "./ui/separator";
 import Image from "next/image";
+import { toast } from "sonner";
+import { useTRPC } from "@/trpc/client";
+import { useMutation } from "@tanstack/react-query";
+import { useUploadThing } from "@/lib/uploadthing";
 
 export function CreateProductDialog({
   open,
@@ -26,6 +30,8 @@ export function CreateProductDialog({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) {
+  const [message, setMessage] = useState("🚀 Create");
+
   const [loading, setLoading] = useState(false);
 
   const [name, setName] = useState("");
@@ -54,74 +60,101 @@ export function CreateProductDialog({
   const [sizeValue, setSizeValue] = useState("");
   const [sizes, setSizes] = useState<{ name: string; value: string }[]>([]);
 
+  const handleClear = () => {
+    setName("");
+    setCategory("");
+    setDescription("");
+    setPrice("");
+    setStockQuantity("");
+
+    setEnableColors(false);
+    setEnableSizes(false);
+    setEnableImages(false);
+
+    setColorName("");
+    setColorValue("#000000");
+    setColors([]);
+
+    setSizeName("");
+    setSizeValue("");
+    setSizes([]);
+
+    setProductImages([]);
+  };
+
   const [productImages, setProductImages] = useState<
     { file: File; alt: string; priority: number }[]
   >([]);
 
-  const handleCreate = () => {
+  const trpc = useTRPC();
+
+  const mutation = useMutation(trpc.products.createProduct.mutationOptions());
+
+  const { startUpload } = useUploadThing("imageUploader", {
+    onClientUploadComplete: () => {
+      setMessage("");
+    },
+    onUploadBegin: () => {
+      setMessage("Uploading");
+    },
+  });
+
+  const handleCreate = async () => {
     setLoading(true);
 
-    const productId = crypto.randomUUID(); // temporary local UUID for mapping
+    let uploadedImages: { url: string; alt: string; priority: number }[] = [];
 
-    const now = new Date().toISOString();
+    if (enableImages && productImages.length > 0) {
+      const uploaded = await startUpload(productImages.map((img) => img.file));
 
-    const product = {
-      id: productId,
-      storeId: "your-store-id", // Replace this with the actual store ID
-      name: name.trim(),
-      description: description.trim(),
-      category: category.trim(),
-      price: parseFloat(price),
-      stockQuantity: parseInt(stockQuantity),
-      images: productImages.map((img) => ({
-        url: URL.createObjectURL(img.file), // Replace with real upload URL
-        alt: img.alt,
-        priority: img.priority,
-      })),
-      createdAt: now,
-      updatedAt: now,
-      deletedAt: null,
-    };
+      if (!uploaded || uploaded.length !== productImages.length) {
+        throw new Error("Some images failed to upload.");
+      }
 
-    const colorEntries = colors.map((c) => ({
-      id: crypto.randomUUID(),
-      productId,
-      name: c.name.trim(),
-      value: c.value.trim(),
-      createdAt: now,
-      updatedAt: now,
-    }));
-
-    const sizeEntries = sizes.map((s) => ({
-      id: crypto.randomUUID(),
-      productId,
-      name: s.name.trim(),
-      value: s.value.trim(),
-      createdAt: now,
-      updatedAt: now,
-    }));
-
-    const imageEntries = productImages.map((img) => ({
-      id: crypto.randomUUID(),
-      productId,
-      url: URL.createObjectURL(img.file), // Replace with real URL after upload
-      alt: img.alt.trim(),
-      priority: img.priority,
-      createdAt: now,
-    }));
-
-    console.log({
-      product,
-      colors: colorEntries,
-      sizes: sizeEntries,
-      productImages: imageEntries,
-    });
-
-    // Simulate API submission delay
-    setTimeout(() => {
-      setLoading(false);
-      setOpen(false);
-    }, 1500);
+      uploadedImages = uploaded.map((res, index) => ({
+        url: res.ufsUrl,
+        alt: productImages[index].alt.trim(),
+        priority: productImages[index].priority,
+      }));
+    }
+    setMessage("Creating product");
+    mutation.mutate(
+      {
+        storeName: "next", // replace with actual store ID
+        name: name,
+        description: description,
+        category: category,
+        price: price,
+        stockQuantity: Number(stockQuantity),
+        sizes: enableSizes
+          ? sizes.map((s) => ({
+              name: s.name.trim(),
+              value: s.value.trim(),
+            }))
+          : [],
+        colors: enableColors
+          ? colors.map((c) => ({
+              name: c.name.trim(),
+              value: c.value.trim(),
+            }))
+          : [],
+        images: uploadedImages,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Product created.");
+          handleClear(); // 👈 clear the form fields here
+        },
+        onError: (error) => {
+          toast.error(error.message);
+        },
+        onSettled: () => {
+          setOpen(false);
+          setLoading(false);
+          setMessage("🚀 Create");
+        },
+      }
+    );
   };
 
   return (
@@ -137,7 +170,7 @@ export function CreateProductDialog({
             </DialogDescription>
           </DialogHeader>
 
-          <ScrollArea className="max-h-[60vh] custom-scroll overflow-y-auto pr-2">
+          <ScrollArea className="max-h-[60vh] border-y shadow-inner mt-3 custom-scroll overflow-y-auto pr-2">
             <div className="space-y-6 mt-4 pb-4 p-1">
               <div className="flex flex-col gap-y-1.5">
                 <Label htmlFor="name">📛 Product Name</Label>
@@ -384,6 +417,7 @@ export function CreateProductDialog({
                               >
                                 {/* ❌ Remove Button */}
                                 <button
+                                  disabled={loading}
                                   type="button"
                                   className="absolute -top-2 -right-2 bg-white border border-gray-300 rounded-full p-1 shadow hover:bg-gray-100"
                                   onClick={() => {
@@ -457,7 +491,8 @@ export function CreateProductDialog({
 
           <DialogFooter className="mt-6">
             <Button className="w-full sm:w-auto" onClick={handleCreate}>
-              🚀 Create Product
+              {loading && <LoaderIcon className="animate-spin" />}
+              {message}
             </Button>
           </DialogFooter>
         </fieldset>
