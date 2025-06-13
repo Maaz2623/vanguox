@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { inferRouterOutputs } from "@trpc/server";
 import { AppRouter } from "@/trpc/routers/_app";
 import { useTRPC } from "@/trpc/client";
@@ -28,7 +24,7 @@ type Products = inferRouterOutputs<AppRouter>["products"]["getProducts"];
 export const ProductsContainer = () => {
   const trpc = useTRPC();
 
-  const { data } = useQuery(trpc.products.getProducts.queryOptions());
+  const { data } = useSuspenseQuery(trpc.products.getProducts.queryOptions());
 
   if (!data) {
     return <div>loading...</div>;
