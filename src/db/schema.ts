@@ -187,3 +187,24 @@ export const productImages = pgTable("product_images", {
 
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
+
+export const wishlist = pgTable("wishlist", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  userId: text("user_id")
+    .references(() => user.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
+  productId: uuid("product_id")
+    .references(() => products.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
+  createdAt: timestamp("created_at").$defaultFn(
+    () => /* @__PURE__ */ new Date()
+  ),
+
+  updatedAt: timestamp("updated_at").$defaultFn(
+    () => /* @__PURE__ */ new Date()
+  ),
+});

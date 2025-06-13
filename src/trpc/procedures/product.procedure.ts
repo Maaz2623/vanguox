@@ -11,17 +11,23 @@ export const productsRouter = createTRPCRouter({
 
     const formattedProducts = await Promise.all(
       productsList.map(async (product) => {
-        const [productSizes, productColors, images] = await Promise.all([
-          db.select().from(sizes).where(eq(sizes.productId, product.id)),
-          db.select().from(colors).where(eq(colors.productId, product.id)),
-          db
-            .select()
-            .from(productImages)
-            .where(eq(productImages.productId, product.id)),
-        ]);
+        const [productSizes, productColors, images, [store]] =
+          await Promise.all([
+            db.select().from(sizes).where(eq(sizes.productId, product.id)),
+            db.select().from(colors).where(eq(colors.productId, product.id)),
+            db
+              .select()
+              .from(productImages)
+              .where(eq(productImages.productId, product.id)),
+            db
+              .select({ storeId: stores.id, storeName: stores.name })
+              .from(stores)
+              .where(eq(stores.id, product.storeId)),
+          ]);
 
         return {
           ...product,
+          store: store,
           sizes: productSizes ?? [],
           colors: productColors ?? [],
           images: images ?? [],
