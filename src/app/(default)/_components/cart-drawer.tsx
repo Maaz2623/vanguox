@@ -57,7 +57,7 @@ export const CartDrawer = ({ open, setOpen }: CartDrawerProps) => {
     setOrderLoading(true);
     const toastId = toast.loading("Creating your order");
     createOrderMutation.mutate(undefined, {
-      onSuccess: () => {
+      onSuccess: async () => {
         toast.success("Order created", {
           id: toastId,
         });
@@ -71,7 +71,7 @@ export const CartDrawer = ({ open, setOpen }: CartDrawerProps) => {
       onSettled: () => {
         queryClient.invalidateQueries(trpc.cart.getCartItems.queryOptions());
         setOrderLoading(false);
-      },  
+      },
     });
   };
 

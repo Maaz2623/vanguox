@@ -1,6 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from "../init";
 import { db } from "@/db";
 import { cart, cartItems, orderItems, orders, products } from "@/db/schema";
+import { sendEmail } from "@/lib/email";
 import { eq, inArray } from "drizzle-orm";
 
 export const ordersRouter = createTRPCRouter({
@@ -52,6 +53,12 @@ export const ordersRouter = createTRPCRouter({
     await db.insert(orderItems).values(orderItemsData);
 
     await db.delete(cartItems).where(eq(cartItems.cartId, userCart.id));
+
+    await sendEmail({
+      to: ctx.auth.user.email,
+      subject: "ORDER PLACED",
+      text: `Congratulations your order: ${newOrder.id} has been placed.`,
+    });
 
     return {
       message: "Order created successfully",
