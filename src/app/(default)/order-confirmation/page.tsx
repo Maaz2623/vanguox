@@ -2,17 +2,15 @@
 
 import { useEffect } from "react";
 import confetti from "canvas-confetti";
-import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 const OrderConfirmationPage = () => {
-  const params = useSearchParams();
-  const orderId = params.get("orderId") || "ORD000000";
-  const deliveryDateStart = params.get("startDate") || "Jun 20";
-  const deliveryDateEnd = params.get("endDate") || "Jun 23";
+  const orderId = "ORD000000";
+  const deliveryDateStart = "Jun 20";
+  const deliveryDateEnd = "Jun 23";
 
   useEffect(() => {
     confetti({
