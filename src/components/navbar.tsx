@@ -33,6 +33,8 @@ import Image from "next/image";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { CartDrawer } from "@/app/(default)/_components/cart-drawer";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
 
 export const Navbar = () => {
   const {
@@ -62,6 +64,10 @@ export const Navbar = () => {
       }
     );
   };
+
+  const trpc = useTRPC();
+
+  const { data } = useSuspenseQuery(trpc.cart.getCartItems.queryOptions());
 
   const components: { title: string; href: string; description: string }[] = [
     {
@@ -104,7 +110,7 @@ export const Navbar = () => {
   return (
     <>
       <CartDrawer open={cartOpen} setOpen={setCartOpen} />
-      <div className="border h-14 px-3 bg-white rounded-lg flex justify-between items-center">
+      <div className="border h-14 px-3 bg-white rounded-lg mb-2 flex justify-between items-center">
         <div>
           <Image src={`/logo.svg`} alt="logo" width={150} height={100} />
         </div>
@@ -253,8 +259,14 @@ export const Navbar = () => {
           <Button
             variant={`outline`}
             size={`icon`}
+            className="relative"
             onClick={() => setCartOpen(true)}
           >
+            {data.length !== 0 && (
+              <span className="absolute text-xs bg-destructive rounded-full p-0.5 font-semibold text-white size-5 -top-2 -right-2">
+                {data.length}
+              </span>
+            )}{" "}
             <ShoppingCartIcon />
           </Button>
           <UserDropdown handleSignOut={handleSignOut}>

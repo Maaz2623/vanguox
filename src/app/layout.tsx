@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import Script from "next/script";
 import { TRPCReactProvider } from "@/trpc/client";
 
 export const metadata: Metadata = {
@@ -35,7 +34,6 @@ export default function RootLayout({
 
           <Toaster position="top-center" />
         </TRPCReactProvider>
-        <Script src="/flowbite/flowbite.min.js" strategy="afterInteractive" />
       </body>
     </html>
   );

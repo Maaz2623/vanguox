@@ -237,6 +237,7 @@ export const cartItems = pgTable("cart_items", {
       onDelete: "cascade",
     })
     .notNull(),
+  quantity: integer("quantity").notNull().default(1),
   createdAt: timestamp("created_at").$defaultFn(
     () => /* @__PURE__ */ new Date()
   ),
