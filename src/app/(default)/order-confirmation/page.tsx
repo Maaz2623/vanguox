@@ -14,8 +14,8 @@ const OrderConfirmationPage = () => {
 
   useEffect(() => {
     confetti({
-      particleCount: 500,
-      spread: 100,
+      particleCount: 300,
+      spread: 120,
       origin: { y: 0.6 },
     });
   }, []);

@@ -2,7 +2,14 @@ import { createTRPCRouter, protectedProcedure } from "../init";
 import { db } from "@/db";
 import { cart, cartItems, orderItems, orders, products } from "@/db/schema";
 import { sendEmail } from "@/lib/email";
+import { generateOrderId } from "@/lib/functions";
 import { eq, inArray } from "drizzle-orm";
+import Razorpay from "razorpay";
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID!,
+  key_secret: process.env.RAZORPAY_KEY_SECRET!,
+});
 
 export const ordersRouter = createTRPCRouter({
   createOrder: protectedProcedure.mutation(async ({ ctx }) => {
@@ -34,9 +41,12 @@ export const ordersRouter = createTRPCRouter({
       return acc + Number(price) * item.quantity;
     }, 0);
 
+    const customOrderId = generateOrderId();
+
     const [newOrder] = await db
       .insert(orders)
       .values({
+        id: customOrderId,
         userId,
         cartId: userCart.id,
         totalAmount: totalAmount.toString(),
@@ -60,9 +70,21 @@ export const ordersRouter = createTRPCRouter({
       text: `Congratulations your order: ${newOrder.id} has been placed.`,
     });
 
+    const razorpayOrder = await razorpay.orders.create({
+      amount: totalAmount * 100, // amount in paise
+      currency: "INR",
+      receipt: newOrder.id,
+      notes: {
+        userId,
+      },
+    });
+
     return {
       message: "Order created successfully",
       orderId: newOrder.id,
+      razorpayOrderId: razorpayOrder.id,
+      amount: razorpayOrder.amount,
+      currency: razorpayOrder.currency,
     };
   }),
 });

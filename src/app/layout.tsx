@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { TRPCReactProvider } from "@/trpc/client";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -33,6 +34,7 @@ export default function RootLayout({
           </div>
 
           <Toaster position="top-center" />
+          <Script src="https://checkout.razorpay.com/v1/checkout.js" />
         </TRPCReactProvider>
       </body>
     </html>

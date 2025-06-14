@@ -25,6 +25,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
+
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Razorpay: any;
+  }
+}
 
 interface CartDrawerProps {
   open: boolean;
@@ -34,9 +42,9 @@ interface CartDrawerProps {
 export const CartDrawer = ({ open, setOpen }: CartDrawerProps) => {
   const isMobile = useIsMobile();
 
-  const trpc = useTRPC();
+  const session = authClient.useSession();
 
-  const queryClient = useQueryClient();
+  const trpc = useTRPC();
 
   const [orderLoading, setOrderLoading] = useState(false);
 
@@ -56,20 +64,47 @@ export const CartDrawer = ({ open, setOpen }: CartDrawerProps) => {
   const handleCheckout = () => {
     setOrderLoading(true);
     const toastId = toast.loading("Creating your order");
+
     createOrderMutation.mutate(undefined, {
-      onSuccess: async () => {
+      onSuccess: async (data) => {
         toast.success("Order created", {
           id: toastId,
         });
-        router.push(`/order-confirmation`);
+
+        const razorpayScriptLoaded = await loadRazorpayScript();
+        if (!razorpayScriptLoaded) {
+          toast.error("Failed to load Razorpay");
+          return;
+        }
+
+        const options = {
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+          amount: data.amount,
+          currency: data.currency,
+          name: "VANGUOX",
+          description: "Checkout Payment",
+          order_id: data.razorpayOrderId,
+          handler: () => {
+            router.push(`/order-confirmation`);
+            // Optional: Send response.razorpay_payment_id to your backend to verify
+          },
+          prefill: {
+            name: session.data?.user.name,
+            email: session.data?.user.email,
+          },
+          theme: { color: "#3399cc" },
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+        setOpen(false);
       },
-      onError: (error) => {
-        toast.error(error.message, {
+      onError: () => {
+        toast.error("Something went wrong", {
           id: toastId,
         });
       },
       onSettled: () => {
-        queryClient.invalidateQueries(trpc.cart.getCartItems.queryOptions());
         setOrderLoading(false);
       },
     });
@@ -291,3 +326,11 @@ const CartProductCard = ({
     </fieldset>
   );
 };
+
+const loadRazorpayScript = () =>
+  new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = resolve;
+    document.body.appendChild(script);
+  });

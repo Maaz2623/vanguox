@@ -6,6 +6,7 @@ import {
   uuid,
   integer,
   decimal,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -248,7 +249,7 @@ export const cartItems = pgTable("cart_items", {
 });
 
 export const orders = pgTable("orders", {
-  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  id: varchar("id").primaryKey().notNull(),
 
   userId: text("user_id")
     .notNull()
@@ -272,7 +273,7 @@ export const orders = pgTable("orders", {
 export const orderItems = pgTable("order_items", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
 
-  orderId: uuid("order_id")
+  orderId: varchar("order_id")
     .notNull()
     .references(() => orders.id, { onDelete: "cascade" }),
 
