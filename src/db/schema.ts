@@ -246,3 +246,59 @@ export const cartItems = pgTable("cart_items", {
     () => /* @__PURE__ */ new Date()
   ),
 });
+
+export const orders = pgTable("orders", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+
+  cartId: uuid("cart_id")
+    .notNull()
+    .references(() => cart.id, { onDelete: "set null" }), // in case you want to preserve order even if cart is deleted
+
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+});
+
+export const orderItems = pgTable("order_items", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+
+  orderId: uuid("order_id")
+    .notNull()
+    .references(() => orders.id, { onDelete: "cascade" }),
+
+  productId: uuid("product_id")
+    .notNull()
+    .references(() => products.id, { onDelete: "restrict" }),
+
+  quantity: integer("quantity").notNull(),
+  priceAtPurchase: decimal("price_at_purchase", {
+    precision: 10,
+    scale: 2,
+  }).notNull(),
+});
+
+export const sellerWallet = pgTable("seller_wallet", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  userId: text("user_id")
+    .references(() => user.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
+  balance: decimal("balance", { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").$defaultFn(
+    () => /* @__PURE__ */ new Date()
+  ),
+  updatedAt: timestamp("updated_at").$defaultFn(
+    () => /* @__PURE__ */ new Date()
+  ),
+});

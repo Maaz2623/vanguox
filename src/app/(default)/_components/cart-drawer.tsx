@@ -24,6 +24,7 @@ import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface CartDrawerProps {
   open: boolean;
@@ -35,12 +36,44 @@ export const CartDrawer = ({ open, setOpen }: CartDrawerProps) => {
 
   const trpc = useTRPC();
 
+  const queryClient = useQueryClient();
+
+  const [orderLoading, setOrderLoading] = useState(false);
+
   const { data: cartItems, isLoading } = useSuspenseQuery(
     trpc.cart.getCartItems.queryOptions()
   );
   const subtotal = cartItems.reduce((total, item) => {
     return total + item.quantity * Number(item.product.price);
   }, 0);
+
+  const createOrderMutation = useMutation(
+    trpc.orders.createOrder.mutationOptions()
+  );
+
+  const router = useRouter();
+
+  const handleCheckout = () => {
+    setOrderLoading(true);
+    const toastId = toast.loading("Creating your order");
+    createOrderMutation.mutate(undefined, {
+      onSuccess: () => {
+        toast.success("Order created", {
+          id: toastId,
+        });
+        router.push(`/order-confirmation`);
+      },
+      onError: (error) => {
+        toast.error(error.message, {
+          id: toastId,
+        });
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(trpc.cart.getCartItems.queryOptions());
+        setOrderLoading(false);
+      },  
+    });
+  };
 
   return (
     <Drawer
@@ -88,20 +121,24 @@ export const CartDrawer = ({ open, setOpen }: CartDrawerProps) => {
           )}
         </div>
         <div>
-          <DrawerFooter>
-            {cartItems.length > 0 && (
-              <>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-semibold">₹{subtotal}</span>
-                </div>
+          <fieldset disabled={orderLoading}>
+            <DrawerFooter>
+              {cartItems.length > 0 && (
+                <>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span className="font-semibold">₹{subtotal}</span>
+                  </div>
 
-                <div className="flex gap-2">
-                  <Button className="flex-1">Checkout</Button>
-                </div>
-              </>
-            )}
-          </DrawerFooter>
+                  <div className="flex gap-2">
+                    <Button className="flex-1" onClick={handleCheckout}>
+                      Checkout
+                    </Button>
+                  </div>
+                </>
+              )}
+            </DrawerFooter>
+          </fieldset>
         </div>
       </DrawerContent>
     </Drawer>
