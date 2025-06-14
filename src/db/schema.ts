@@ -208,3 +208,40 @@ export const wishlist = pgTable("wishlist", {
     () => /* @__PURE__ */ new Date()
   ),
 });
+
+export const cart = pgTable("cart", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  userId: text("user_id")
+    .references(() => user.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
+  createdAt: timestamp("created_at").$defaultFn(
+    () => /* @__PURE__ */ new Date()
+  ),
+
+  updatedAt: timestamp("updated_at").$defaultFn(
+    () => /* @__PURE__ */ new Date()
+  ),
+});
+
+export const cartItems = pgTable("cart_items", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  cartId: uuid("cart_id")
+    .references(() => cart.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
+  productId: uuid("product_id")
+    .references(() => products.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
+  createdAt: timestamp("created_at").$defaultFn(
+    () => /* @__PURE__ */ new Date()
+  ),
+
+  updatedAt: timestamp("updated_at").$defaultFn(
+    () => /* @__PURE__ */ new Date()
+  ),
+});

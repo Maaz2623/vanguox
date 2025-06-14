@@ -1,6 +1,11 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { inferRouterOutputs } from "@trpc/server";
 import { AppRouter } from "@/trpc/routers/_app";
 import { useTRPC } from "@/trpc/client";
@@ -17,7 +22,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type Products = inferRouterOutputs<AppRouter>["products"]["getProducts"];
 
@@ -57,17 +62,34 @@ function ProductCard({ product }: ProductCardProps) {
     trpc.wishlist.removeProduct.mutationOptions()
   );
 
+  const addToCartMutation = useMutation(trpc.cart.addToCart.mutationOptions());
+
   const { data: productExists, isLoading } = useQuery(
     trpc.wishlist.getProduct.queryOptions({
       productId: product.id,
     })
   );
 
-  useEffect(() => {
-    if (!isLoading && productExists !== undefined) {
-      setAdded(!!productExists); // cast to boolean just in case
-    }
-  }, [productExists, isLoading]);
+  const handleAddToCart = () => {
+    const toastId = toast.loading("Add item to cart...");
+    addToCartMutation.mutate(
+      {
+        productId: product.id,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Item added to cart.", {
+            id: toastId,
+          });
+        },
+        onError: () => {
+          toast.error("Could not add item to cart.", {
+            id: toastId,
+          });
+        },
+      }
+    );
+  };
 
   const handleAddProduct = () => {
     setLoading(true);
@@ -226,17 +248,19 @@ function ProductCard({ product }: ProductCardProps) {
           </div>
 
           {/* Add to Cart */}
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full"
-            onClick={(e) => {
-              e.preventDefault(); // prevent link navigation
-              // handleAddToCart(product.id);
-            }}
-          >
-            Add to Cart
-          </Button>
+          <div className="w-full flex justify-end items-center">
+            <Button
+              size="sm"
+              className=""
+              onClick={(e) => {
+                e.preventDefault(); // prevent link navigation
+                // handleAddToCart(product.id);
+                handleAddToCart();
+              }}
+            >
+              Add to Cart
+            </Button>
+          </div>
         </div>
       </div>
     </Link>
