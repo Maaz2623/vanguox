@@ -65,8 +65,10 @@ export const CartDrawer = ({ open, setOpen }: CartDrawerProps) => {
     trpc.orders.postPayment.mutationOptions()
   );
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     setOrderLoading(true);
+    const razorpayScriptLoaded = await loadRazorpayScript();
+
     const toastId = toast.loading("Creating your order");
 
     createOrderMutation.mutate(undefined, {
@@ -75,7 +77,6 @@ export const CartDrawer = ({ open, setOpen }: CartDrawerProps) => {
           id: toastId,
         });
 
-        const razorpayScriptLoaded = await loadRazorpayScript();
         if (!razorpayScriptLoaded) {
           toast.error("Failed to load Razorpay");
           return;
@@ -88,14 +89,14 @@ export const CartDrawer = ({ open, setOpen }: CartDrawerProps) => {
           name: "VANGUOX",
           description: "Checkout Payment",
           order_id: data.razorpayOrderId,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           handler: async function (response: any) {
             // Razorpay gives you: response.razorpay_payment_id, response.razorpay_order_id
             const paymentId = response.razorpay_payment_id;
             const razorpayOrderId = response.razorpay_order_id;
 
             try {
-              await postPaymentMutation.mutateAsync({
+              postPaymentMutation.mutate({
                 razorpayOrderId,
                 paymentId,
               });
@@ -117,8 +118,8 @@ export const CartDrawer = ({ open, setOpen }: CartDrawerProps) => {
         rzp.open();
         setOpen(false);
       },
-      onError: () => {
-        toast.error("Something went wrong", {
+      onError: (error) => {
+        toast.error(error.message, {
           id: toastId,
         });
       },

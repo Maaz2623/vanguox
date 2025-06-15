@@ -3,11 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "../init";
 import Razorpay from "razorpay";
 import { db } from "@/db";
 import { z } from "zod";
-
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-});
+import { eq } from "drizzle-orm";
 
 const razorpayX = new Razorpay({
   key_id: process.env.RAZORPAY_PAYOUT_KEY_ID!,
@@ -15,15 +11,6 @@ const razorpayX = new Razorpay({
 });
 
 export const razorpayRouter = createTRPCRouter({
-  createOrder: protectedProcedure.mutation(async ({}) => {
-    const order = await razorpay.orders.create({
-      amount: 100 * 100,
-      currency: "INR",
-      receipt: "receipt_" + Math.random().toString(36).substring(7),
-    });
-
-    return order;
-  }),
   createFundAccount: protectedProcedure
     .input(
       z.object({
@@ -37,17 +24,17 @@ export const razorpayRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.auth.user.id;
 
-      // const [existing] = await db
-      //   .select()
-      //   .from(razorpayFundAccounts)
-      //   .where(eq(razorpayFundAccounts.userId, userId));
+      const [existing] = await db
+        .select()
+        .from(razorpayFundAccounts)
+        .where(eq(razorpayFundAccounts.userId, userId));
 
-      // if (existing) {
-      //   return {
-      //     message: "Fund account already exists",
-      //     fundAccountId: existing.fundAccountId,
-      //   };
-      // }
+      if (existing) {
+        return {
+          message: "Fund account already exists",
+          fundAccountId: existing.fundAccountId,
+        };
+      }
 
       const key_id = process.env.RAZORPAY_PAYOUT_KEY_ID!;
       const key_secret = process.env.RAZORPAY_PAYOUT_KEY_SECRET!;
@@ -81,7 +68,7 @@ export const razorpayRouter = createTRPCRouter({
           ifsc: input.ifsc,
           account_number: input.accountNumber,
         },
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       // 3. Validate Fund Account

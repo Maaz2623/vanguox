@@ -127,81 +127,138 @@ export const ordersRouter = createTRPCRouter({
 
       return { message: "Payment processed and wallets updated." };
     }),
+
   createOrder: protectedProcedure.mutation(async ({ ctx }) => {
-    const userId = ctx.auth.user.id;
+    try {
+      console.log("🔐 Razorpay Config:", {
+        key: process.env.RAZORPAY_KEY_ID,
+        secret: process.env.RAZORPAY_KEY_SECRET,
+      });
 
-    const [userCart] = await db
-      .select()
-      .from(cart)
-      .where(eq(cart.userId, userId));
+      const userId = ctx.auth.user.id;
+      console.log("➡️ Starting order creation for user:", userId);
 
-    const userCartItems = await db
-      .select()
-      .from(cartItems)
-      .where(eq(cartItems.cartId, userCart.id));
+      const [userCart] = await db
+        .select()
+        .from(cart)
+        .where(eq(cart.userId, userId));
 
-    const productIds = userCartItems.map((item) => item.productId);
+      if (!userCart) {
+        console.error("❌ No cart found for user:", userId);
+        throw new Error("Cart not found");
+      }
 
-    const productsData = await db
-      .select()
-      .from(products)
-      .where(inArray(products.id, productIds));
+      const userCartItems = await db
+        .select()
+        .from(cartItems)
+        .where(eq(cartItems.cartId, userCart.id));
 
-    const productsPriceMap = Object.fromEntries(
-      productsData.map((p) => [p.id, p.price])
-    );
+      if (userCartItems.length === 0) {
+        console.error("❌ Cart is empty for user:", userId);
+        throw new Error("Your cart is empty");
+      }
 
-    const totalAmount = userCartItems.reduce((acc, item) => {
-      const price = productsPriceMap[item.productId];
-      return acc + Number(price) * item.quantity;
-    }, 0);
+      const productIds = userCartItems.map((item) => item.productId);
 
-    const customOrderId = generateOrderId();
+      const productsData = await db
+        .select()
+        .from(products)
+        .where(inArray(products.id, productIds));
 
-    // 👉 Create Razorpay order before inserting into DB
-    const razorpayOrder = await razorpay.orders.create({
-      amount: totalAmount * 100, // amount in paise
-      currency: "INR",
-      receipt: customOrderId,
-      notes: {
-        userId,
-      },
-    });
+      const productsPriceMap = Object.fromEntries(
+        productsData.map((p) => [p.id, p.price])
+      );
 
-    // ✅ Store the Razorpay order ID in DB
-    const [newOrder] = await db
-      .insert(orders)
-      .values({
-        id: customOrderId,
-        userId,
-        cartId: userCart.id,
-        totalAmount: totalAmount.toString(),
-        razorpayId: razorpayOrder.id, // ✅ THIS IS THE FIX
-      })
-      .returning();
+      const totalAmount = userCartItems.reduce((acc, item) => {
+        const price = productsPriceMap[item.productId];
+        if (price === undefined) {
+          console.error(`❌ Price not found for product ID: ${item.productId}`);
+          throw new Error(`Product with ID ${item.productId} is unavailable`);
+        }
+        return acc + Number(price) * item.quantity;
+      }, 0);
 
-    const orderItemsData = userCartItems.map((item) => ({
-      orderId: newOrder.id,
-      productId: item.productId,
-      quantity: item.quantity,
-      priceAtPurchase: productsPriceMap[item.productId],
-    }));
+      if (totalAmount <= 0) {
+        console.error("❌ Invalid total amount:", totalAmount);
+        throw new Error("Total amount must be greater than zero");
+      }
 
-    await db.insert(orderItems).values(orderItemsData);
-    await db.delete(cartItems).where(eq(cartItems.cartId, userCart.id));
+      const customOrderId = generateOrderId();
+      console.log("🧾 Generated custom order ID:", customOrderId);
 
-    await sendEmail({
-      to: ctx.auth.user.email,
-      subject: "ORDER PLACED",
-      text: `Congratulations your order: ${newOrder.id} has been placed.`,
-    });
+      // Razorpay Order Creation
+      const razorpayOrder = await razorpay.orders.create({
+        amount: totalAmount * 100, // amount in paise
+        currency: "INR",
+        receipt: customOrderId,
+        notes: {
+          userId,
+        },
+      });
 
-    return {
-      message: "Order created successfully",
-      orderId: newOrder.id,
-      razorpayOrderId: razorpayOrder.id,
-      amount: razorpayOrder.amount,
-      currency: razorpayOrder.currency,
-    };
+      if (!razorpayOrder || !razorpayOrder.id) {
+        console.error("❌ Razorpay order creation failed", razorpayOrder);
+        throw new Error("Failed to create order with Razorpay");
+      }
+
+      console.log("✅ Razorpay order created:", razorpayOrder.id);
+
+      const [newOrder] = await db
+        .insert(orders)
+        .values({
+          id: customOrderId,
+          userId,
+          cartId: userCart.id,
+          totalAmount: totalAmount.toString(),
+          razorpayId: razorpayOrder.id,
+        })
+        .returning();
+
+      const orderItemsData = userCartItems.map((item) => ({
+        orderId: newOrder.id,
+        productId: item.productId,
+        quantity: item.quantity,
+        priceAtPurchase: productsPriceMap[item.productId],
+      }));
+
+      await db.insert(orderItems).values(orderItemsData);
+      console.log("🛒 Order items inserted:", orderItemsData.length);
+
+      await db.delete(cartItems).where(eq(cartItems.cartId, userCart.id));
+      console.log("🧹 Cart items cleared for cart:", userCart.id);
+
+      await sendEmail({
+        to: ctx.auth.user.email,
+        subject: "ORDER PLACED",
+        text: `Congratulations! Your order ${newOrder.id} has been placed.`,
+      });
+      console.log("📧 Confirmation email sent to:", ctx.auth.user.email);
+
+      return {
+        message: "Order created successfully",
+        orderId: newOrder.id,
+        razorpayOrderId: razorpayOrder.id,
+        amount: razorpayOrder.amount,
+        currency: razorpayOrder.currency,
+      };
+    } catch (err) {
+      console.error(
+        "❌ Error in createOrder mutation:",
+        JSON.stringify(err, null, 2)
+      );
+
+      if (err instanceof Error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: err.message,
+        });
+      }
+
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Unknown server error",
+        cause: err,
+      });
+    }
   }),
 });
