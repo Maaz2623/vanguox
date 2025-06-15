@@ -27,6 +27,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 const jetbrains = IBM_Plex_Mono({
+  subsets: ["latin"],
   weight: ["400"],
 });
 
