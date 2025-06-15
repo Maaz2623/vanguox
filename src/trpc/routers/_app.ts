@@ -4,6 +4,7 @@ import { ordersRouter } from "../procedures/orders.procedure";
 import { productsRouter } from "../procedures/product.procedure";
 import { razorpayRouter } from "../procedures/razorpay.procedure";
 import { storeRouter } from "../procedures/store.procedure";
+import { walletRouter } from "../procedures/wallet.procedure";
 import { wishlistRouter } from "../procedures/wishlist.procedure";
 export const appRouter = createTRPCRouter({
   stores: storeRouter,
@@ -12,6 +13,7 @@ export const appRouter = createTRPCRouter({
   cart: cartRouter,
   orders: ordersRouter,
   razorpay: razorpayRouter,
+  wallets: walletRouter
 });
 // export type definition of API
 export type AppRouter = typeof appRouter;

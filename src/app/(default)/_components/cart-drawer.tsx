@@ -61,6 +61,10 @@ export const CartDrawer = ({ open, setOpen }: CartDrawerProps) => {
 
   const router = useRouter();
 
+  const postPaymentMutation = useMutation(
+    trpc.orders.postPayment.mutationOptions()
+  );
+
   const handleCheckout = () => {
     setOrderLoading(true);
     const toastId = toast.loading("Creating your order");
@@ -84,9 +88,23 @@ export const CartDrawer = ({ open, setOpen }: CartDrawerProps) => {
           name: "VANGUOX",
           description: "Checkout Payment",
           order_id: data.razorpayOrderId,
-          handler: () => {
-            router.push(`/order-confirmation`);
-            // Optional: Send response.razorpay_payment_id to your backend to verify
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          handler: async function (response: any) {
+            // Razorpay gives you: response.razorpay_payment_id, response.razorpay_order_id
+            const paymentId = response.razorpay_payment_id;
+            const razorpayOrderId = response.razorpay_order_id;
+
+            try {
+              await postPaymentMutation.mutateAsync({
+                razorpayOrderId,
+                paymentId,
+              });
+
+              toast.success("Payment successful!");
+              router.push(`/order-confirmation`);
+            } catch {
+              toast.error("Payment verification failed.");
+            }
           },
           prefill: {
             name: session.data?.user.name,

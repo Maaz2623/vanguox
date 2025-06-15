@@ -13,6 +13,7 @@ import {
   CircleCheckIcon,
   CircleHelpIcon,
   CircleIcon,
+  LayoutDashboardIcon,
   ShoppingCartIcon,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -301,6 +302,10 @@ const UserDropdown = ({ children, handleSignOut }: UserDropdownProps) => {
           <DropdownMenuItem>
             <User className="mr-2 h-4 w-4" />
             Profile
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push(`/dashboard`)}>
+            <LayoutDashboardIcon className="mr-2 h-4 w-4" />
+            Dashboard
           </DropdownMenuItem>
           <DropdownMenuItem>
             <BadgeDollarSign className="mr-2 h-4 w-4" />

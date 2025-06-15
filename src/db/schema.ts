@@ -7,6 +7,7 @@ import {
   integer,
   decimal,
   varchar,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -248,6 +249,14 @@ export const cartItems = pgTable("cart_items", {
   ),
 });
 
+export const orderStatusEnum = pgEnum("order_status", [
+  "pending",
+  "paid",
+  "shipped",
+  "delivered",
+  "cancelled",
+]);
+
 export const orders = pgTable("orders", {
   id: varchar("id").primaryKey().notNull(),
 
@@ -260,6 +269,12 @@ export const orders = pgTable("orders", {
     .references(() => cart.id, { onDelete: "set null" }), // in case you want to preserve order even if cart is deleted
 
   totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+
+  status: orderStatusEnum("order_status").default("pending").notNull(),
+
+  razorpayId: text("razorpay_id"),
+
+  notes: text("notes"),
 
   createdAt: timestamp("created_at")
     .$defaultFn(() => new Date())
@@ -282,10 +297,17 @@ export const orderItems = pgTable("order_items", {
     .references(() => products.id, { onDelete: "restrict" }),
 
   quantity: integer("quantity").notNull(),
+
   priceAtPurchase: decimal("price_at_purchase", {
     precision: 10,
     scale: 2,
   }).notNull(),
+
+  // ✅ Add this
+  isSettled: boolean("is_settled").default(false).notNull(),
+
+  // (Optional) delivery timestamp
+  deliveredAt: timestamp("delivered_at"),
 });
 
 export const sellerWallet = pgTable("seller_wallet", {
@@ -294,12 +316,59 @@ export const sellerWallet = pgTable("seller_wallet", {
     .references(() => user.id, {
       onDelete: "cascade",
     })
+    .unique()
     .notNull(),
-  balance: decimal("balance", { precision: 10, scale: 2 }).notNull(),
-  createdAt: timestamp("created_at").$defaultFn(
-    () => /* @__PURE__ */ new Date()
-  ),
-  updatedAt: timestamp("updated_at").$defaultFn(
-    () => /* @__PURE__ */ new Date()
-  ),
+  balance: decimal("balance", { precision: 10, scale: 2 })
+    .default("0.00")
+    .notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const walletTransactions = pgTable("wallet_transactions", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+
+  walletId: uuid("wallet_id")
+    .references(() => sellerWallet.id, { onDelete: "cascade" })
+    .notNull(),
+
+  type: text("type").notNull(), // "credit" or "debit"
+
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+
+  reason: text("reason"), // e.g. "order payment", "manual update"
+
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const withdrawalStatusEnum = pgEnum("withdrawal_status", [
+  "processing",
+  "processed",
+  "failed",
+  "cancelled",
+]);
+
+export const withdrawals = pgTable("withdrawals", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  razorpayPayoutId: text("razorpay_payout_id"),
+  status: withdrawalStatusEnum("withdrawal_status")
+    .default("processing")
+    .notNull(),
+  note: text("note"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const razorpayFundAccounts = pgTable("razorpay_fund_accounts", {
+  id: uuid("id").primaryKey().defaultRandom(), // ✅ or defaultFn: uuid
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id),
+  contactId: text("contact_id").notNull(),
+  fundAccountId: text("fund_account_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
