@@ -11,6 +11,9 @@ const app = new Hono<{
 }>();
 
 const routes = app
+  .get("/", (c) => {
+    return c.json("Server is live and healthy!");
+  })
   .use(
     "/api/auth/*", // or replace with "*" to enable cors for all routes
     cors({
