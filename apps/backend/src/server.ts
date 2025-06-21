@@ -5,45 +5,20 @@ import { auth } from "./lib/auth";
 
 const app = new Hono();
 
-// ✅ Global CORS middleware
-app
-  .use(
-    "*",
-    cors({
-      origin: ["https://vanguox.com", "http://localhost:3000"],
-      credentials: true,
-      allowHeaders: ["Content-Type", "Authorization"],
-      allowMethods: ["GET", "POST", "OPTIONS"],
-    })
-  )
-  .all(
-    "/api/auth/*",
-    cors({
-      origin: "https://vanguox.com",
-      credentials: true,
-      allowHeaders: ["Content-Type", "Authorization"],
-      allowMethods: ["GET", "POST", "OPTIONS"],
-    }),
-    async (c) => {
-      const req = c.req.raw;
-      const origin = c.req.header("Origin") ?? "";
+// ✅ Global CORS for all routes
+app.use(
+  "*",
+  cors({
+    origin: ["https://vanguox.com", "http://localhost:3000"],
+    credentials: true,
+    allowHeaders: ["Content-Type", "Authorization"],
+    allowMethods: ["GET", "POST", "OPTIONS"],
+  })
+);
 
-      const res = await auth.handler(req);
-
-      // Only patch CORS if the Origin is present
-      if (origin) {
-        res.headers.set("Access-Control-Allow-Origin", origin);
-        res.headers.set("Access-Control-Allow-Credentials", "true");
-        res.headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-        res.headers.set(
-          "Access-Control-Allow-Headers",
-          "Content-Type, Authorization"
-        );
-        res.headers.set("Vary", "Origin");
-      }
-
-      return res;
-    }
-  );
+// ✅ Direct passthrough to your auth handler
+app.all("/api/auth/*", async (c) => {
+  return await auth.handler(c.req.raw); // or auth.handler(req)
+});
 
 serve({ fetch: app.fetch, port: 5000 });
