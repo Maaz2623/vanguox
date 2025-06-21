@@ -1,10 +1,7 @@
-import { createHTTPHandler } from "@trpc/server/adapters/standalone";
-import { appRouter } from "./trpc/router/_app";
 import { auth } from "./lib/auth";
 import { cors } from "hono/cors";
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
-import { hc } from "hono/client";
 
 const app = new Hono<{
   Variables: {
