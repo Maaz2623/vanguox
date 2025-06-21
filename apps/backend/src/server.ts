@@ -16,25 +16,34 @@ app
       allowMethods: ["GET", "POST", "OPTIONS"],
     })
   )
-  .all("/api/auth/*", async (c) => {
-    const req = c.req.raw;
-    const origin = c.req.header("Origin") ?? "";
+  .all(
+    "/api/auth/*",
+    cors({
+      origin: "https://vanguox.com",
+      credentials: true,
+      allowHeaders: ["Content-Type", "Authorization"],
+      allowMethods: ["GET", "POST", "OPTIONS"],
+    }),
+    async (c) => {
+      const req = c.req.raw;
+      const origin = c.req.header("Origin") ?? "";
 
-    const res = await auth.handler(req);
+      const res = await auth.handler(req);
 
-    // Only patch CORS if the Origin is present
-    if (origin) {
-      res.headers.set("Access-Control-Allow-Origin", origin);
-      res.headers.set("Access-Control-Allow-Credentials", "true");
-      res.headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-      res.headers.set(
-        "Access-Control-Allow-Headers",
-        "Content-Type, Authorization"
-      );
-      res.headers.set("Vary", "Origin");
+      // Only patch CORS if the Origin is present
+      if (origin) {
+        res.headers.set("Access-Control-Allow-Origin", origin);
+        res.headers.set("Access-Control-Allow-Credentials", "true");
+        res.headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        res.headers.set(
+          "Access-Control-Allow-Headers",
+          "Content-Type, Authorization"
+        );
+        res.headers.set("Vary", "Origin");
+      }
+
+      return res;
     }
-
-    return res;
-  });
+  );
 
 serve({ fetch: app.fetch, port: 5000 });
