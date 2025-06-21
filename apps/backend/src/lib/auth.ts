@@ -6,7 +6,6 @@ import { sendEmail } from "./email";
 import { emailOTP } from "better-auth/plugins";
 
 export const auth = betterAuth({
-
   advanced: {
     crossSubDomainCookies: {
       enabled: true,
@@ -41,12 +40,16 @@ export const auth = betterAuth({
       });
     },
   },
-  trustedOrigins: ["http://localhost:3000", "http://localhost:5000"],
+  trustedOrigins: [
+    "http://localhost:3000",
+    "http://localhost:5000",
+    "https://vanguox.onrender.com",
+  ],
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      redirectURI: "http://localhost:5000/api/auth/callback/google",
+      redirectURI: `https://${process.env.BETTER_AUTH_URL}/api/auth/callback/google`,
     },
   },
 
