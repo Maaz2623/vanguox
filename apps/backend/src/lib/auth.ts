@@ -44,6 +44,7 @@ export const auth = betterAuth({
     "http://localhost:3000",
     "http://localhost:5000",
     "https://vanguox.onrender.com",
+    "https://vanguox.com",
   ],
   socialProviders: {
     google: {
