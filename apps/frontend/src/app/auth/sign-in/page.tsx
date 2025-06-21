@@ -204,10 +204,7 @@ function LoginForm({ className, setFormType }: FormProps) {
     await authClient.signIn.social(
       {
         provider: "google",
-        callbackURL:
-          process.env.NODE_ENV === "production"
-            ? `${process.env.VERCEL_APP_URL}`
-            : "https://localhost:3000",
+        callbackURL: "https://vanguox.com",
       },
       {
         onSuccess: () => {
@@ -408,10 +405,7 @@ function SignUpForm({ className, setFormType }: FormProps) {
         name,
         email,
         password,
-        callbackURL:
-          process.env.NODE_ENV === "production"
-            ? `${process.env.VERCEL_APP_URL}`
-            : "https://localhost:3000",
+        callbackURL: "https://vanguox.com",
       },
       {
         onRequest: () => {
