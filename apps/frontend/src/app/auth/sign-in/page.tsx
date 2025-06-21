@@ -206,7 +206,7 @@ function LoginForm({ className, setFormType }: FormProps) {
         provider: "google",
         callbackURL:
           process.env.NODE_ENV === "production"
-            ? process.env.VERCEL_URL
+            ? process.env.VERCEL_APP_URL
             : "https://localhost:3000",
       },
       {
@@ -410,7 +410,7 @@ function SignUpForm({ className, setFormType }: FormProps) {
         password,
         callbackURL:
           process.env.NODE_ENV === "production"
-            ? process.env.VERCEL_URL
+            ? process.env.VERCEL_APP_URL
             : "https://localhost:3000",
       },
       {
