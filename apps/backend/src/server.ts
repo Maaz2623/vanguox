@@ -21,17 +21,15 @@ const app = new Hono();
 //   }
 // );
 
-app.use("*", cors());
-
 app.use(
   "/*",
   cors({
-    origin: "https://vanguox.com",
+    origin: "*",
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["POST", "GET", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
     maxAge: 600,
-    credentials: true,
+    credentials: false,
   })
 );
 
