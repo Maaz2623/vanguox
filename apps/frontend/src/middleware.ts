@@ -6,10 +6,12 @@ const authRoutes = ["/auth/sign-in"];
 export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
-  // Call your Hono backend to check session (via /session endpoint)
-  const res = await fetch("https://vanguox.onrender.com/session", {
+  // Forward the cookie header manually
+  const res = await fetch("https://server.vanguox.com/session", {
     method: "GET",
-    credentials: "include",
+    headers: {
+      cookie: req.headers.get("cookie") || "", // 🔥 forward user's cookie
+    },
   });
 
   const isAuthenticated = res.ok;

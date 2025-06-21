@@ -9,6 +9,7 @@ export const auth = betterAuth({
   advanced: {
     crossSubDomainCookies: {
       enabled: true,
+      domain: ".vanguox.com",
     },
     defaultCookieAttributes: {
       sameSite: "none",
