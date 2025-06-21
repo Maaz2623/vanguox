@@ -1,29 +1,42 @@
 import { Hono } from "hono";
-import { cors } from "hono/cors";
 import { serve } from "@hono/node-server";
 import { auth } from "./lib/auth";
 
 const app = new Hono();
 
-// ✅ Global CORS middleware
-app.use(
-  "*",
-  cors({
-    origin: ["https://vanguox.com", "http://localhost:3000"],
-    credentials: true,
-    allowHeaders: ["Content-Type", "Authorization"],
-    allowMethods: ["GET", "POST", "OPTIONS"],
-  })
-);
-
-// ✅ Manually respond to OPTIONS (preflight) requests
+// ✅ Manually handle all OPTIONS requests
 app.options("*", (c) => {
-  return c.text("OK");
+  const origin = c.req.header("Origin") ?? "";
+  const res = new Response(null, { status: 204 });
+
+  res.headers.set("Access-Control-Allow-Origin", origin);
+  res.headers.set("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.headers.set(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization"
+  );
+  res.headers.set("Access-Control-Allow-Credentials", "true");
+  res.headers.set("Vary", "Origin");
+
+  return res;
 });
 
-// ✅ Auth passthrough
+// ✅ Auth passthrough with CORS headers
 app.all("/api/auth/*", async (c) => {
-  return await auth.handler(c.req.raw); // Or `auth.handler(...)`
+  const origin = c.req.header("Origin") ?? "";
+  const req = c.req.raw;
+  const res = await auth.handler(req);
+
+  res.headers.set("Access-Control-Allow-Origin", origin);
+  res.headers.set("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.headers.set(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization"
+  );
+  res.headers.set("Access-Control-Allow-Credentials", "true");
+  res.headers.set("Vary", "Origin");
+
+  return res;
 });
 
 serve({ fetch: app.fetch, port: 5000 });
