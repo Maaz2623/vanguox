@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 const HomePage = () => {
   const handleGet = async () => {
-    const res = await fetch("https://vanguox.onrender.com/hello", {
+    const res = await fetch("https://vanguox.onrender.com/sessions", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
