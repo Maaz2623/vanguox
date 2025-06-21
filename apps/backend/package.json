@@ -3,16 +3,20 @@
   "module": "server.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun --watch ./src/server.ts",
-    "build": "bun build ./src/server.ts --outdir dist --target bun",
-    "start": "bun ./dist/server.js"
+    "dev": "nodemon ./src/server.ts",
+    "build": "tsc",
+    "start": "node ./dist/server.js"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/node": "^24.0.3",
     "drizzle-kit": "^0.31.1",
-    "tsx": "^4.20.3"
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
   },
   "peerDependencies": {
     "typescript": "^5"
@@ -30,5 +34,10 @@
     "hono": "^4.8.1",
     "resend": "^4.6.0",
     "zod": "^3.25.67"
-  }
+  },
+  "version": "1.0.0",
+  "description": "To install dependencies:",
+  "main": "./src/server.ts",
+  "author": "",
+  "license": "ISC"
 }
