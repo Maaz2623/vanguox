@@ -27,9 +27,9 @@ app.use(
   "/*",
   cors({
     origin: "https://vanguox.com",
-    allowHeaders: ["X-Custom-Header", "Upgrade-Insecure-Requests"],
+    allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["POST", "GET", "OPTIONS"],
-    exposeHeaders: ["Content-Length", "X-Kuma-Revision"],
+    exposeHeaders: ["Content-Length"],
     maxAge: 600,
     credentials: true,
   })
