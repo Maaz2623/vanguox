@@ -17,7 +17,7 @@ const routes = app
   .use(
     "/api/auth/*", // or replace with "*" to enable cors for all routes
     cors({
-      origin: "http://localhost:3000", // replace with your origin
+      origin: "https://vanguox.com", // replace with your origin
       allowHeaders: ["Content-Type", "Authorization"],
       allowMethods: ["POST", "GET", "OPTIONS"],
       exposeHeaders: ["Content-Length"],
