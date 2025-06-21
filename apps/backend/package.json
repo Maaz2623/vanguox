@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "bun --watch ./src/server.ts",
     "build": "bun build ./src/server.ts --outdir dist --target bun",
-    "start": "bun ./src/server.ts"
+    "start": "bun ./dist/server.js"
   },
   "devDependencies": {
     "@types/bun": "latest",
