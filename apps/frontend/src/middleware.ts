@@ -7,7 +7,7 @@ export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
   // Call your Hono backend to check session (via /session endpoint)
-  const res = await fetch("https://vanguox.onrender.com.com/session", {
+  const res = await fetch("https://vanguox.onrender.com/session", {
     headers: {
       Cookie: req.headers.get("cookie") || "", // forward cookies for auth
     },
