@@ -1,17 +1,10 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
 
 const HomePage = () => {
   const handleGet = async () => {
-    const res = await fetch("https://vanguox.onrender.com/sessions", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    const data = await res.json();
-    console.log(data);
+    await authClient.signOut();
   };
 
   return (
