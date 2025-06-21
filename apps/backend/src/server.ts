@@ -37,4 +37,4 @@ app.get("/", (c) => {
   return c.json("Welcome Maaz");
 });
 
-serve({ fetch: app.fetch, port: 5000 });
+serve({ fetch: app.fetch });

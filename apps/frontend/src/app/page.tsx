@@ -5,6 +5,9 @@ const HomePage = () => {
   const handleGet = async () => {
     const res = await fetch("https://vanguox.onrender.com/", {
       method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
 
     const data = await res.json();
