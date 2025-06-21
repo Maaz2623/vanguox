@@ -37,4 +37,4 @@ app.get("/hello", (c) => {
   return c.json("Welcome Maaz");
 });
 
-serve({ fetch: app.fetch, port: 5000 });
+export default app;
