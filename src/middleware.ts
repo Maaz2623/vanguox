@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 const protectedRoutes = ["/", "/stores"];
 const authRoutes = ["/auth/sign-in"];
 
+
 export async function middleware(req: NextRequest) {
   const session = await auth.api.getSession(req);
 
