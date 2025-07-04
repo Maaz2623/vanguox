@@ -16,7 +16,7 @@ export const ChatList = () => {
           <span className="text-xs text-muted-foreground mb-2">
             Chat History
           </span>
-          <div className="flex flex-col overflow-y-auto max-h-[415px] scrollbar-thin">
+          <div className="flex flex-col overflow-y-auto max-h-[423px] scrollbar-thin">
             <div className="h-full flex flex-col w-full pr-2">
               {Array.from({ length: 20 }).map((_, i) => (
                 <Button
