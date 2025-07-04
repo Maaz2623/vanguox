@@ -7,7 +7,7 @@ export const ChatView = () => {
       <div className="flex flex-col flex-1 rounded-lg">
         <MessagesList />
       </div>
-      <div className="w-[90%] mx-auto">
+      <div className="mx-auto w-full pr-8">
         <MessageForm />
       </div>
     </div>

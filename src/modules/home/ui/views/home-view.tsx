@@ -19,8 +19,8 @@ export const HomeView = () => {
             <ChatList />
           </div>
         </ResizablePanel>
-        <div className="mx-1.5 flex flex-col justify-center items-center">
-          <ResizableHandle className="mx-4 h-[80%]" withHandle />
+        <div className="flex flex-col justify-center items-center">
+          <ResizableHandle className="mx-10 h-[80%]" withHandle />
         </div>
         <ResizablePanel className="" defaultSize={80} minSize={70}>
           <ChatView />
