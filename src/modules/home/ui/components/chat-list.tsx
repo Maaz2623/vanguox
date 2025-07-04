@@ -3,7 +3,7 @@ import { PlusIcon } from "lucide-react";
 
 export const ChatList = () => {
   return (
-    <div className="border flex flex-col flex-1 bg-sidebar rounded-xl py-4 px-2">
+    <div className="border flex flex-col flex-1 rounded-xl py-4 px-2">
       <div className="border flex flex-col gap-y-4">
         <div className="border">
           <Button className="w-full">

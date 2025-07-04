@@ -65,7 +65,7 @@ export const MessagesList = () => {
   }, [messages.length]);
 
   return (
-    <ScrollArea className="h-[405px] overflow-y-auto px-12 flex flex-col">
+    <ScrollArea className="h-[405px] overflow-y-auto pr-8 flex flex-col">
       <div className="flex flex-col gap-y-4">
         {messages.map((message) => (
           <MessagesCard
