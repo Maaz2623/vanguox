@@ -17,12 +17,12 @@ export const ChatList = () => {
             Chat History
           </span>
           <div className="flex flex-col overflow-y-auto max-h-[423px] scrollbar-thin">
-            <div className="h-full flex flex-col w-full pr-2">
+            <div className="h-full flex flex-col w-full pr-2 gap-y-1">
               {Array.from({ length: 20 }).map((_, i) => (
                 <Button
                   key={i}
                   variant="ghost"
-                  className="justify-start text-sm truncate w-full text-muted-foreground rounded-[8px]!"
+                  className="justify-start hover:bg-accent text-sm truncate w-full text-muted-foreground rounded-[8px]!"
                 >
                   Chat with Assistant #{i + 1}
                 </Button>
