@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import Image from "next/image";
-import Typewriter from "typewriter-effect";
+import { Typewriter } from "react-simple-typewriter";
 
 interface MessagesCardProps {
   role: "USER" | "ASSISTANT";
@@ -59,16 +59,7 @@ const AssistantMessage = ({
       <div className="w-full flex justify-start">
         <Card className="shadow-none bg-sidebar w-fit p-5 border-none animate-fade-in">
           {isTypewriter ? (
-            <Typewriter
-              onInit={(typewriter) => {
-                typewriter.typeString(content).start();
-              }}
-              options={{
-                cursor: "",
-                skipAddStyles: true,
-                delay: 10, // typing speed
-              }}
-            />
+            <Typewriter typeSpeed={10} words={[content]} />
           ) : (
             <p>{content}</p>
           )}
