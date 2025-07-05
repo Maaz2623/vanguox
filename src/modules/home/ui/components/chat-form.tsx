@@ -33,7 +33,7 @@ export const MessageForm = ({
 }) => {
   const trpc = useTRPC();
 
-  const mutation = useMutation(trpc.product.getMany.mutationOptions());
+  const mutation = useMutation(trpc.message.create.mutationOptions());
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

@@ -77,6 +77,8 @@ export const MessagesList = ({
             role={message.role}
             content={message.content}
             isTypewriter={message.id === freshAssistantId}
+            keywords={message.keywords}
+            summary={message.summary}
           />
         ))}
         {isLastMessageUser && <MessageLoading />}
