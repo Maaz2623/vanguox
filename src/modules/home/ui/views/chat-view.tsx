@@ -5,6 +5,8 @@ import { useOptimistic, useState } from "react";
 export const ChatView = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [messages, setMessages] = useState<any[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+
   const [optimisticMessages, addOptimisticMessage] = useOptimistic(
     messages,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -21,7 +23,11 @@ export const ChatView = () => {
         />
       </div>
       <div className="mx-auto w-full pr-8">
-        <MessageForm addOptimisticMessage={addOptimisticMessage} />
+        <MessageForm
+          isTyping={isTyping}
+          setIsTyping={setIsTyping}
+          addOptimisticMessage={addOptimisticMessage}
+        />
       </div>
     </div>
   );

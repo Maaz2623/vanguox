@@ -13,6 +13,8 @@ export const productsRouter = createTRPCRouter({
       chatId: z.string()
     })
   ).mutation(async ({ input }) => {
+
+
     const ai = new GoogleGenAI({
       apiKey: process.env.GEMINI_API_KEY!,
     });

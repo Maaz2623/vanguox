@@ -1,9 +1,10 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessagesCard } from "./messages-card";
-import { startTransition, useEffect, useRef } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
 import { useSubscription } from "@trpc/tanstack-react-query";
+import { MessageLoading } from "./message-loading";
 
 export const MessagesList = ({
   messages,
@@ -19,6 +20,8 @@ export const MessagesList = ({
 }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const shouldScrollRef = useRef(false); // 🧠 track if we should scroll
+  const [freshAssistantId, setFreshAssistantId] = useState<string | null>(null);
+
   const trpc = useTRPC();
   const chatId = "64bd38e0-3443-4610-86f6-28f5309c5a8c";
 
@@ -39,6 +42,14 @@ export const MessagesList = ({
         onData: (newMsg) => {
           shouldScrollRef.current = true;
           setMessages((prev) => [...prev, newMsg]);
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          if (newMsg.role === "ASSISTANT") {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            setFreshAssistantId(newMsg.id); // 👈 Mark this one for typing
+          }
+
           startTransition(() => {
             addOptimisticMessage(newMsg);
           });
@@ -54,12 +65,21 @@ export const MessagesList = ({
     }
   }, [messages.length]);
 
+  const lastMessage = messages[messages.length - 1];
+  const isLastMessageUser = lastMessage?.role === "USER";
+
   return (
     <ScrollArea className="h-[405px] overflow-y-auto pr-8 flex flex-col">
       <div className="flex flex-col gap-y-4">
         {messages.map((message, i) => (
-          <MessagesCard key={i} role={message.role} content={message.content} />
+          <MessagesCard
+            key={i}
+            role={message.role}
+            content={message.content}
+            isTypewriter={message.id === freshAssistantId}
+          />
         ))}
+        {isLastMessageUser && <MessageLoading />}
         <div ref={bottomRef} />
       </div>
     </ScrollArea>

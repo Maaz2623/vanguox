@@ -22,10 +22,14 @@ const formSchema = z.object({
 });
 
 export const MessageForm = ({
+  isTyping,
+  setIsTyping,
   addOptimisticMessage,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   addOptimisticMessage: (msg: any) => void;
+  isTyping: boolean;
+  setIsTyping: (isTyping: boolean) => void;
 }) => {
   const trpc = useTRPC();
 
@@ -40,8 +44,7 @@ export const MessageForm = ({
 
   const [isFocused, setIsFocused] = useState(false);
   const showUsage = false;
-  const isPending = false;
-  const isDisabled = isPending || !form.formState.isValid;
+  const isDisabled = isTyping || !form.formState.isValid;
   const chatId = "64bd38e0-3443-4610-86f6-28f5309c5a8c";
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -56,6 +59,7 @@ export const MessageForm = ({
     });
 
     try {
+      setIsTyping(true);
       mutation.mutateAsync(
         {
           query: values.value,
@@ -67,6 +71,9 @@ export const MessageForm = ({
           },
           onError: (error) => {
             console.log(error.message);
+          },
+          onSettled: () => {
+            setIsTyping(false);
           },
         }
       );
@@ -92,7 +99,7 @@ export const MessageForm = ({
           render={({ field }) => (
             <TextAreaAutosize
               {...field}
-              disabled={isPending}
+              disabled={isTyping}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               minRows={2}
@@ -122,7 +129,7 @@ export const MessageForm = ({
               isDisabled && "bg-muted-foreground border"
             )}
           >
-            {isPending ? (
+            {isTyping ? (
               <Loader2Icon className="size-4 animate-spin" />
             ) : (
               <ArrowUpIcon />

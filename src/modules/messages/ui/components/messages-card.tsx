@@ -2,23 +2,29 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import Image from "next/image";
+import Typewriter from "typewriter-effect";
 
 interface MessagesCardProps {
   role: "USER" | "ASSISTANT";
   content: string;
+  isTypewriter?: boolean;
 }
 
-export const MessagesCard = ({ role, content }: MessagesCardProps) => {
+export const MessagesCard = ({
+  role,
+  content,
+  isTypewriter = false,
+}: MessagesCardProps) => {
   if (role === "USER") {
     return <UserMessage content={content} />;
   } else {
-    return <AssistantMessage content={content} />;
+    return <AssistantMessage content={content} isTypewriter={isTypewriter} />;
   }
 };
 
 const UserMessage = ({ content }: { content: string }) => {
   return (
-    <div className="w-full flex justify-end">
+    <div className="w-full flex justify-end text-[16px]">
       <Card className="shadow-none w-fit max-w-[60%] p-4 bg-[#3e4bbb] text-white border-none">
         {content}
       </Card>
@@ -26,13 +32,16 @@ const UserMessage = ({ content }: { content: string }) => {
   );
 };
 
-const AssistantMessage = ({ content }: { content: string }) => {
+const AssistantMessage = ({
+  content,
+  isTypewriter,
+}: {
+  content: string;
+  isTypewriter?: boolean;
+}) => {
   return (
     <div
-      className={cn(
-        "flex flex-col group px-2 pb-4 max-w-[70%]"
-        // type === "ERROR" && "text-red-700 dark:text-red-500"
-      )}
+      className={cn("flex flex-col group px-2 pb-4 max-w-[70%] text-[16px]")}
     >
       <div className="flex items-center gap-2 pl-2 mb-2">
         <Image
@@ -48,8 +57,21 @@ const AssistantMessage = ({ content }: { content: string }) => {
         </span>
       </div>
       <div className="w-full flex justify-start">
-        <Card className="shadow-none bg-sidebar w-fit p-5 border-none">
-          {content}
+        <Card className="shadow-none bg-sidebar w-fit p-5 border-none animate-fade-in">
+          {isTypewriter ? (
+            <Typewriter
+              onInit={(typewriter) => {
+                typewriter.typeString(content).start();
+              }}
+              options={{
+                cursor: "",
+                skipAddStyles: true,
+                delay: 10, // typing speed
+              }}
+            />
+          ) : (
+            <p>{content}</p>
+          )}
         </Card>
       </div>
     </div>
