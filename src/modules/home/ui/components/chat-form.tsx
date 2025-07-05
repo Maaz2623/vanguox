@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowUpIcon, Loader2Icon } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
 
 const formSchema = z.object({
   value: z
@@ -20,6 +22,10 @@ const formSchema = z.object({
 });
 
 export const MessageForm = () => {
+  const trpc = useTRPC();
+
+  const mutation = useMutation(trpc.product.getMany.mutationOptions());
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -31,12 +37,32 @@ export const MessageForm = () => {
   const showUsage = false;
   const isPending = false;
   const isDisabled = isPending || !form.formState.isValid;
+  const chatId = "64bd38e0-3443-4610-86f6-28f5309c5a8c";
 
-  const onSubmit = () => {};
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      mutation.mutateAsync(
+        {
+          query: values.value,
+          chatId: chatId,
+        },
+        {
+          onSuccess: (data) => {
+            console.log(data);
+          },
+          onError: (error) => {
+            console.log(error.message);
+          },
+        }
+      );
+      form.reset();
+    } catch (err) {
+      console.error("Failed to send event:", err);
+    }
+  };
 
   return (
     <Form {...form}>
-      {showUsage && <div>Usage</div>}
       <form
         className={cn(
           "relative border p-4 pt-1 rounded-xl bg-sidebar dark:bg-sidebar transition-all",
