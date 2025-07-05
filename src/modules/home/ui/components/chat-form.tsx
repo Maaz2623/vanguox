@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormField } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { startTransition, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowUpIcon, Loader2Icon } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
@@ -21,7 +21,12 @@ const formSchema = z.object({
     }),
 });
 
-export const MessageForm = () => {
+export const MessageForm = ({
+  addOptimisticMessage,
+}: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  addOptimisticMessage: (msg: any) => void;
+}) => {
   const trpc = useTRPC();
 
   const mutation = useMutation(trpc.product.getMany.mutationOptions());
@@ -40,6 +45,16 @@ export const MessageForm = () => {
   const chatId = "64bd38e0-3443-4610-86f6-28f5309c5a8c";
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const optimisticMsg = {
+      role: "USER",
+      content: values.value,
+      chatId,
+    };
+
+    startTransition(() => {
+      addOptimisticMessage(optimisticMsg);
+    });
+
     try {
       mutation.mutateAsync(
         {

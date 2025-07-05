@@ -1,17 +1,26 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessagesCard } from "./messages-card";
-import { useEffect, useRef, useState } from "react";
+import { startTransition, useEffect, useRef } from "react";
 import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
 import { useSubscription } from "@trpc/tanstack-react-query";
 
-export const MessagesList = () => {
+export const MessagesList = ({
+  messages,
+  setMessages,
+  addOptimisticMessage,
+}: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  messages: any[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setMessages: React.Dispatch<React.SetStateAction<any[]>>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  addOptimisticMessage: (msg: any) => void;
+}) => {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const shouldScrollRef = useRef(false); // 🧠 track if we should scroll
   const trpc = useTRPC();
   const chatId = "64bd38e0-3443-4610-86f6-28f5309c5a8c";
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [messages, setMessages] = useState<any[]>([]);
 
   const { data: initialMessages } = useQuery(
     trpc.message.getMany.queryOptions({ chatId })
@@ -21,21 +30,28 @@ export const MessagesList = () => {
     if (initialMessages) {
       setMessages(initialMessages);
     }
-  }, [initialMessages]);
+  }, [initialMessages, setMessages]);
 
   useSubscription(
     trpc.message.onMessageAdd.subscriptionOptions(
       { chatId },
       {
         onData: (newMsg) => {
+          shouldScrollRef.current = true;
           setMessages((prev) => [...prev, newMsg]);
+          startTransition(() => {
+            addOptimisticMessage(newMsg);
+          });
         },
       }
     )
   );
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView();
+    if (shouldScrollRef.current) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      shouldScrollRef.current = false;
+    }
   }, [messages.length]);
 
   return (
