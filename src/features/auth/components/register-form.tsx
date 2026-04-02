@@ -8,12 +8,14 @@ import {
 } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import z from "zod";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, Form, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { FaGithub, FaGoogle } from "react-icons/fa";
+import { Separator } from "@/components/ui/separator";
 import {
   Field,
   FieldError,
@@ -25,29 +27,37 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 
-const loginSchema = z.object({
-  email: z.string().min(1, "Email is required"),
-  password: z.string().min(1, "Password is required"),
-});
+const registerSchema = z
+  .object({
+    email: z.string().min(1, "Email is required"),
+    password: z.string().min(1, "Password is required"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
-export const LoginForm = () => {
+export const RegisterForm = () => {
   const router = useRouter();
 
   const form = useForm({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
-  const onSubmit = async (values: LoginFormValues) => {
-    await authClient.signIn.email(
+  const onSubmit = async (values: RegisterFormValues) => {
+    await authClient.signUp.email(
       {
+        name: values.email,
         email: values.email,
-        password: values.password,
+        password: values.confirmPassword,
         callbackURL: "/",
       },
       {
@@ -67,8 +77,8 @@ export const LoginForm = () => {
     <div className="w-full p-6 flex justify-center items-center max-w-md">
       <Card className="w-full text-center shadow-md">
         <CardHeader>
-          <CardTitle>Welcome Back</CardTitle>
-          <CardDescription>Login to your account</CardDescription>
+          <CardTitle>Get Started</CardTitle>
+          <CardDescription>Create your account</CardDescription>
         </CardHeader>
         <CardContent>
           <FieldSet disabled={isPending}>
@@ -120,6 +130,26 @@ export const LoginForm = () => {
                     </Field>
                   )}
                 />
+                <Controller
+                  name="confirmPassword"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field>
+                      <div className="flex items-center justify-between">
+                        <FieldLabel>Confirm Password</FieldLabel>
+                      </div>
+                      <Input
+                        type="password"
+                        {...field}
+                        aria-invalid={fieldState.invalid}
+                        placeholder="*******"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
               </FieldGroup>
               <Field>
                 <div className="flex flex-col">
@@ -143,13 +173,13 @@ export const LoginForm = () => {
               </div>
               <div>
                 <p>
-                  Don't have an account?{" "}
+                  Already have an account?{" "}
                   <Link
                     aria-disabled={isPending}
-                    href={`/sign-up`}
+                    href={`/sign-in`}
                     className="underline"
                   >
-                    Sign up
+                    Sign in
                   </Link>
                 </p>
               </div>
