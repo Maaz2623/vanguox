@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -25,12 +26,14 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ThemeProvider
           attribute={`class`}
-          defaultTheme="dark"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >
-          <Toaster />
-          {children}
+          <TooltipProvider>
+            <Toaster />
+            {children}
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>
