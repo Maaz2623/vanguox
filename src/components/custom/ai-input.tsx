@@ -492,243 +492,259 @@ export function AIInput({
           setActiveDropdown,
         }}
       >
-        <div className="w-full max-w-2xl mx-auto relative group">
-          <m.div
-            layoutId="input-container"
-            layout
-            transition={{
-              duration: 0.3,
-              ease: "easeInOut",
-            }}
-            className="relative bg-white dark:bg-black/60 rounded-[32px] border border-black/30 dark:border-white/30"
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              accept="image/*,.pdf,.doc,.txt,.md"
-              className="hidden"
-              onChange={handleFileSelect}
-            />
-            <input
-              ref={videoInputRef}
-              type="file"
-              multiple
-              accept="video/*"
-              className="hidden"
-              onChange={handleFileSelect}
-            />
-
-            <AIInputFilesPreview files={uploadedFiles} onRemove={removeFile} />
-
-            <div className="p-4 pb-14">
-              <m.textarea
-                layout
-                transition={{
-                  duration: 0.2,
-                  ease: "easeInOut",
-                }}
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={isListening}
-                placeholder={isListening ? "Listening..." : placeholder}
-                className="w-full bg-transparent text-lg text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 resize-none outline-none min-h-[40px] max-h-[200px]"
-                rows={1}
-                style={{
-                  minHeight: "44px",
-                  height: "auto",
-                }}
-                onInput={(e) => {
-                  const target = e.target as HTMLTextAreaElement;
-                  target.style.height = "auto";
-                  target.style.height = `${target.scrollHeight}px`;
-                }}
+        <m.div
+          layout
+          transition={{
+            type: "spring",
+            stiffness: 200,
+            damping: 25,
+          }}
+          className={cn(
+            "w-full px-4 flex flex-col z-20",
+            hasSubmitted ? "pb-8" : "flex-1 justify-center items-center",
+          )}
+        >
+          <div className="w-full max-w-2xl mx-auto relative group">
+            <m.div
+              layoutId="input-container"
+              layout
+              transition={{
+                duration: 0.3,
+                ease: "easeInOut",
+              }}
+              className="relative bg-white dark:bg-black/60 rounded-[32px] border border-black/30 dark:border-white/30"
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/*,.pdf,.doc,.txt,.md"
+                className="hidden"
+                onChange={handleFileSelect}
               />
-            </div>
+              <input
+                ref={videoInputRef}
+                type="file"
+                multiple
+                accept="video/*"
+                className="hidden"
+                onChange={handleFileSelect}
+              />
 
-            <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center z-10">
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <button
-                    onClick={() =>
-                      setActiveDropdown(
-                        activeDropdown === "plus" ? null : "plus",
-                      )
-                    }
-                    className={cn(
-                      "p-2.5 rounded-full transition-colors border",
-                      activeDropdown === "plus"
-                        ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-black/10 dark:border-white/10"
-                        : "bg-zinc-50 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border-black/5 dark:border-white/5",
-                    )}
-                  >
-                    <PlusIcon
+              <AIInputFilesPreview
+                files={uploadedFiles}
+                onRemove={removeFile}
+              />
+
+              <div className="p-4 pb-14">
+                <m.textarea
+                  layout
+                  transition={{
+                    duration: 0.2,
+                    ease: "easeInOut",
+                  }}
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  disabled={isListening}
+                  placeholder={isListening ? "Listening..." : placeholder}
+                  className="w-full bg-transparent text-lg text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 resize-none outline-none min-h-[40px] max-h-[200px]"
+                  rows={1}
+                  style={{
+                    minHeight: "44px",
+                    height: "auto",
+                  }}
+                  onInput={(e) => {
+                    const target = e.target as HTMLTextAreaElement;
+                    target.style.height = "auto";
+                    target.style.height = `${target.scrollHeight}px`;
+                  }}
+                />
+              </div>
+
+              <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center z-10">
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <button
+                      onClick={() =>
+                        setActiveDropdown(
+                          activeDropdown === "plus" ? null : "plus",
+                        )
+                      }
                       className={cn(
-                        "w-5 h-5 transition-transform",
-                        activeDropdown === "plus" && "rotate-45",
+                        "p-2.5 rounded-full transition-colors border",
+                        activeDropdown === "plus"
+                          ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-black/10 dark:border-white/10"
+                          : "bg-zinc-50 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border-black/5 dark:border-white/5",
+                      )}
+                    >
+                      <PlusIcon
+                        className={cn(
+                          "w-5 h-5 transition-transform",
+                          activeDropdown === "plus" && "rotate-45",
+                        )}
+                      />
+                    </button>
+                    <AIInputDropdown
+                      isOpen={activeDropdown === "plus"}
+                      onClose={() => setActiveDropdown(null)}
+                      items={plusMenuItems}
+                      className="w-56 bottom-full left-0 mb-2"
+                      renderItem={(item) => (
+                        <button
+                          onClick={() => handlePlusMenuClick(item.id)}
+                          className="flex items-center gap-2 px-4 py-3 w-full text-left text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-2xl transition-colors group"
+                        >
+                          <item.icon className="h-4 w-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-200 transition-colors" />
+                          <span className="text-sm font-medium">
+                            {item.label}
+                          </span>
+                        </button>
                       )}
                     />
-                  </button>
-                  <AIInputDropdown
-                    isOpen={activeDropdown === "plus"}
-                    onClose={() => setActiveDropdown(null)}
-                    items={plusMenuItems}
-                    className="w-56 bottom-full left-0 mb-2"
-                    renderItem={(item) => (
-                      <button
-                        onClick={() => handlePlusMenuClick(item.id)}
-                        className="flex items-center gap-2 px-4 py-3 w-full text-left text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-2xl transition-colors group"
-                      >
-                        <item.icon className="h-4 w-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-200 transition-colors" />
-                        <span className="text-sm font-medium">
-                          {item.label}
-                        </span>
-                      </button>
-                    )}
-                  />
-                </div>
-              </div>
-
-              {/* right side  */}
-
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <AIInputPillButton
-                    layoutId="model-pill"
-                    icon={selectedModel.icon}
-                    isActive={activeDropdown === "model"}
-                    onClick={() =>
-                      setActiveDropdown(
-                        activeDropdown === "model" ? null : "model",
-                      )
-                    }
-                  >
-                    <span className="text-sm font-medium">
-                      {selectedModel.name}
-                    </span>
-                  </AIInputPillButton>
-                  <AIInputDropdown
-                    isOpen={activeDropdown === "model"}
-                    onClose={() => setActiveDropdown(null)}
-                    items={models}
-                    className="w-48 bottom-full right-0 mb-2 p-1"
-                    renderItem={(model) => (
-                      <button
-                        onClick={() => {
-                          setSelectedModel(model);
-                          setActiveDropdown(null);
-                        }}
-                        className={cn(
-                          "flex items-center gap-3 px-4 py-3 w-full text-left text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-2xl transition-colors group",
-                          selectedModel.id === model.id &&
-                            "bg-zinc-100 dark:bg-zinc-800",
-                        )}
-                      >
-                        <model.icon className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-200 transition-colors" />
-                        <span className="text-sm font-medium">
-                          {model.name}
-                        </span>
-                        {selectedModel.id === model.id && (
-                          <CheckIcon className="w-4 h-4 ml-auto text-zinc-500" />
-                        )}
-                      </button>
-                    )}
-                  />
+                  </div>
                 </div>
 
-                <div className="flex justify-end">
-                  <AnimatePresence mode="wait" initial={false}>
-                    {hasText ? (
-                      <m.div
-                        key={`active-controls`}
-                        initial={{
-                          opacity: 0,
-                          scale: 0.9,
-                        }}
-                        animate={{
-                          opacity: 1,
-                          scale: 1,
-                        }}
-                        exit={{
-                          opacity: 0,
-                          scale: 0.9,
-                        }}
-                        transition={{
-                          duration: 0.15,
-                        }}
-                        className="flex items-center gap-2"
-                      >
+                {/* right side  */}
+
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <AIInputPillButton
+                      layoutId="model-pill"
+                      icon={selectedModel.icon}
+                      isActive={activeDropdown === "model"}
+                      onClick={() =>
+                        setActiveDropdown(
+                          activeDropdown === "model" ? null : "model",
+                        )
+                      }
+                    >
+                      <span className="text-sm font-medium">
+                        {selectedModel.name}
+                      </span>
+                    </AIInputPillButton>
+                    <AIInputDropdown
+                      isOpen={activeDropdown === "model"}
+                      onClose={() => setActiveDropdown(null)}
+                      items={models}
+                      className="w-48 bottom-full right-0 mb-2 p-1"
+                      renderItem={(model) => (
                         <button
-                          onClick={() => setValue("")}
-                          className="p-2 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500
-                              dark:hover:text-zinc-300 transition-colors"
-                        >
-                          <XIcon className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={handleSubmit}
-                          className="p-2.5 rounded-full bg-zinc-900 dark:bg-zinc-100 text-white
-                              dark:text-zinc-900 hover:opacity-90 transition-opacity"
-                        >
-                          <ArrowUpIcon className="w-5 h-5" />
-                        </button>
-                      </m.div>
-                    ) : (
-                      <m.div
-                        key={`inactive-controls`}
-                        initial={{
-                          opacity: 0,
-                          scale: 0.9,
-                        }}
-                        animate={{
-                          opacity: 1,
-                          scale: 1,
-                        }}
-                        exit={{
-                          opacity: 0,
-                          scale: 0.9,
-                        }}
-                        transition={{
-                          duration: 0.15,
-                        }}
-                        className="flex items-center gap-2"
-                      >
-                        <button
-                          onClick={() => setIsListening(!isListening)}
+                          onClick={() => {
+                            setSelectedModel(model);
+                            setActiveDropdown(null);
+                          }}
                           className={cn(
-                            "p-2 transition-all duration-300 relative cursor-pointer",
-                            isListening
-                              ? "text-red-500 dark:Text-red-400 bg-red-50 dark:bg-red-900/20 rounded-full"
-                              : "text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
+                            "flex items-center gap-3 px-4 py-3 w-full text-left text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-2xl transition-colors group",
+                            selectedModel.id === model.id &&
+                              "bg-zinc-100 dark:bg-zinc-800",
                           )}
                         >
-                          {isListening ? (
-                            <SquareIcon
-                              className="w-4 h-4"
-                              fill="currentColor"
-                            />
-                          ) : (
-                            <MicIcon className="w-4 h-4" />
-                          )}
-                          {isListening && (
-                            <span className="absolute inset-0 rounded-full animate-ping bg-red-500/20" />
+                          <model.icon className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-200 transition-colors" />
+                          <span className="text-sm font-medium">
+                            {model.name}
+                          </span>
+                          {selectedModel.id === model.id && (
+                            <CheckIcon className="w-4 h-4 ml-auto text-zinc-500" />
                           )}
                         </button>
-                        <button
-                          disabled
-                          className="p-2.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-300 dark:text-zinc-600"
+                      )}
+                    />
+                  </div>
+
+                  <div className="flex justify-end">
+                    <AnimatePresence mode="wait" initial={false}>
+                      {hasText ? (
+                        <m.div
+                          key={`active-controls`}
+                          initial={{
+                            opacity: 0,
+                            scale: 0.9,
+                          }}
+                          animate={{
+                            opacity: 1,
+                            scale: 1,
+                          }}
+                          exit={{
+                            opacity: 0,
+                            scale: 0.9,
+                          }}
+                          transition={{
+                            duration: 0.15,
+                          }}
+                          className="flex items-center gap-2"
                         >
-                          <ArrowUpIcon className="w-4 h-4" />
-                        </button>
-                      </m.div>
-                    )}
-                  </AnimatePresence>
+                          <button
+                            onClick={() => setValue("")}
+                            className="p-2 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500
+                              dark:hover:text-zinc-300 transition-colors"
+                          >
+                            <XIcon className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={handleSubmit}
+                            className="p-2.5 rounded-full bg-zinc-900 dark:bg-zinc-100 text-white
+                              dark:text-zinc-900 hover:opacity-90 transition-opacity"
+                          >
+                            <ArrowUpIcon className="w-5 h-5" />
+                          </button>
+                        </m.div>
+                      ) : (
+                        <m.div
+                          key={`inactive-controls`}
+                          initial={{
+                            opacity: 0,
+                            scale: 0.9,
+                          }}
+                          animate={{
+                            opacity: 1,
+                            scale: 1,
+                          }}
+                          exit={{
+                            opacity: 0,
+                            scale: 0.9,
+                          }}
+                          transition={{
+                            duration: 0.15,
+                          }}
+                          className="flex items-center gap-2"
+                        >
+                          <button
+                            onClick={() => setIsListening(!isListening)}
+                            className={cn(
+                              "p-2 transition-all duration-300 relative cursor-pointer",
+                              isListening
+                                ? "text-red-500 dark:Text-red-400 bg-red-50 dark:bg-red-900/20 rounded-full"
+                                : "text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300",
+                            )}
+                          >
+                            {isListening ? (
+                              <SquareIcon
+                                className="w-4 h-4"
+                                fill="currentColor"
+                              />
+                            ) : (
+                              <MicIcon className="w-4 h-4" />
+                            )}
+                            {isListening && (
+                              <span className="absolute inset-0 rounded-full animate-ping bg-red-500/20" />
+                            )}
+                          </button>
+                          <button
+                            disabled
+                            className="p-2.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-300 dark:text-zinc-600"
+                          >
+                            <ArrowUpIcon className="w-4 h-4" />
+                          </button>
+                        </m.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
               </div>
-            </div>
-          </m.div>
-        </div>
+            </m.div>
+          </div>
+        </m.div>
       </AIInputContext.Provider>
     </LazyMotion>
   );
