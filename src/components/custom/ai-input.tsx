@@ -47,6 +47,7 @@ import {
   ModelSelectorName,
   ModelSelectorTrigger,
 } from "../ai-elements/model-selector";
+import { useChat } from "@ai-sdk/react";
 
 type IconComponent = React.ComponentType<{ className?: string }>;
 
@@ -530,7 +531,7 @@ export function AIInput({
   className,
 }: AIInputProps) {
   const [value, setValue] = useState<string>("");
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { sendMessage } = useChat();
   const [hasSubmitted, setHasSubmitted] = useState<boolean>(false);
   const [isListening, setIsListening] = useState<boolean>(false);
   const [selectedTool, setSelectedTool] = useState<ToolItem | null>(null);
@@ -592,6 +593,10 @@ export function AIInput({
       preview: file.preview,
       type: file.type,
     }));
+
+    sendMessage({
+      text: value,
+    });
 
     if (onSubmit) {
       onSubmit(value, attachments);
