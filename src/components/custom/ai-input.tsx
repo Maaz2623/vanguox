@@ -16,6 +16,7 @@ import {
   MicIcon,
   Paperclip,
   PlusIcon,
+  Sparkle,
   Sparkles,
   SquareIcon,
   Video,
@@ -24,20 +25,34 @@ import {
 import { m, LazyMotion, domMax } from "motion/react";
 import { AnimatePresence } from "motion/react";
 import Image from "next/image";
-import React, { createContext, useContext, useRef, useState } from "react";
+import React, {
+  createContext,
+  memo,
+  useCallback,
+  useContext,
+  useRef,
+  useState,
+} from "react";
+import { models as aiModels, type AIModel } from "@/constants";
+import {
+  ModelSelector,
+  ModelSelectorContent,
+  ModelSelectorEmpty,
+  ModelSelectorGroup,
+  ModelSelectorInput,
+  ModelSelectorItem,
+  ModelSelectorList,
+  ModelSelectorLogo,
+  ModelSelectorLogoGroup,
+  ModelSelectorName,
+  ModelSelectorTrigger,
+} from "../ai-elements/model-selector";
 
 type IconComponent = React.ComponentType<{ className?: string }>;
 
 interface AIInputContextType {
   activeDropdown: "plus" | "tools" | "model" | null;
   setActiveDropdown: (dropdown: "plus" | "tools" | "model" | null) => void;
-}
-
-interface Model {
-  id: string;
-  name: string;
-  label: string;
-  icon: LucideIcon;
 }
 
 interface MenuItem {
@@ -60,7 +75,7 @@ interface Message {
   id: string;
   role: "user" | "ai";
   content: string;
-  attachment?: Attachment[];
+  attachments?: Attachment[];
 }
 
 interface UploadedFile {
@@ -69,18 +84,6 @@ interface UploadedFile {
   preview: string;
   type: "image" | "file" | "video";
 }
-
-const DEFAULT_MODELS: Model[] = [
-  { id: "gpt4o", name: "GPT-4o", label: "GPT-4o", icon: Sparkles },
-  { id: "gpt4", name: "GPT-4", label: "GPT-4", icon: Sparkles },
-  { id: "claude", name: "Claude 3.5", label: "Claude 3.5", icon: Sparkles },
-  {
-    id: "claude-opus",
-    name: "Claude 4.5 Opus",
-    label: "Claude 4.5 Opus",
-    icon: Sparkles,
-  },
-];
 
 const DEFAULT_PLUS_MENU: MenuItem[] = [
   { id: "files", icon: Paperclip, label: "Upload photos & files" },
@@ -301,6 +304,37 @@ export function AIInputPillButton({
 
 AIInputPillButton.displayName = "AIInputPillButton";
 
+interface ModelItemProps {
+  model: AIModel;
+  selectedModel: AIModel;
+  onSelect: (id: string) => void;
+}
+
+const ModelItem = memo(({ model, selectedModel, onSelect }: ModelItemProps) => {
+  const handleSelect = useCallback(
+    () => onSelect(model.id),
+    [onSelect, model.id],
+  );
+  return (
+    <ModelSelectorItem key={model.id} onSelect={handleSelect} value={model.id}>
+      <ModelSelectorLogo provider={model.chefSlug} />
+      <ModelSelectorName>{model.name}</ModelSelectorName>
+      <ModelSelectorLogoGroup>
+        {model.providers.map((provider) => (
+          <ModelSelectorLogo key={provider} provider={provider} />
+        ))}
+      </ModelSelectorLogoGroup>
+      {selectedModel.id === model.id ? (
+        <CheckIcon className="ml-auto size-4" />
+      ) : (
+        <div className="ml-auto size-4" />
+      )}
+    </ModelSelectorItem>
+  );
+});
+
+ModelItem.displayName = "ModelItem";
+
 interface AIInputFilesPreviewProps {
   files: UploadedFile[];
   onRemove: (id: string) => void;
@@ -388,8 +422,98 @@ export function AIInputFilesPreview({
 
 AIInputFilesPreview.displayName = "AIInputFilesPreview";
 
+interface AIInputMessagesProps {
+  messages: Message[];
+  hasSubmitted: boolean;
+  messagesEndRef: React.RefObject<HTMLDivElement | null>;
+}
+
+export function AIInputMessages({
+  messages,
+  hasSubmitted,
+  messagesEndRef,
+}: AIInputMessagesProps) {
+  return (
+    <m.div
+      layout
+      className={cn(
+        "w-full max-w-2xl mx-auto flex flex-col gap-6 overflow-y-auto px-4 hide-scrollbar",
+        hasSubmitted ? "flex-1 pt-10" : "hidden",
+      )}
+    >
+      {hasSubmitted && (
+        <>
+          {messages.map((msg) => (
+            <m.div
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              key={msg.id}
+              className={cn(
+                "flex flex-col gap-2 max-w-[85%]",
+                msg.role === "user" ? "ml-auto items-end" : "items-start",
+              )}
+            >
+              {msg.attachments && msg.attachments.length > 0 && (
+                <div className="flex flex-wrap gap-2 justify-end">
+                  {msg.attachments.map((attachment, attachIdx) => (
+                    <div key={attachIdx} className="relative">
+                      {attachment.type === "image" ? (
+                        <div className="relative w-20 h-20 rounded-[12px] overflow-hidden border border-black/5 dark:border-white/10">
+                          <Image
+                            src={attachment.preview}
+                            alt="Attachment"
+                            fill
+                            sizes="80px"
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : attachment.type === "video" ? (
+                        <div className="relative w-32 h-32 rounded-lg overflow-hidden bg-zinc-200 dark:bg-zinc-700 border border-black/5 dark:border-white/10">
+                          <video
+                            src={attachment.preview}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-20 h-20 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-black/5 dark:border-white/10 flex items-center justify-center">
+                          <FileIcon className="w-8 h-8 text-zinc-500" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {msg.content && (
+                <div
+                  className={cn(
+                    "p-2 rounded-[12px]",
+                    msg.role === "user"
+                      ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                      : "text-zinc-900 dark:text-zinc-100",
+                  )}
+                >
+                  {msg.role === "ai" && (
+                    <div className="flex items-center gap-2 mb-2 text-xs font-medium text-neutral-500">
+                      <Sparkles className="w-3 h-3" />
+                      AI Response
+                    </div>
+                  )}
+                  {msg.content}
+                </div>
+              )}
+            </m.div>
+          ))}
+          <div className="h-24 flex-shrink-0" />
+          <div ref={messagesEndRef} />
+        </>
+      )}
+    </m.div>
+  );
+}
+AIInputMessages.displayName = "AIInputMessages";
+
 interface AIInputProps {
-  models?: Model[];
+  models?: AIModel[];
   tools?: ToolItem[];
   plusMenuItems?: MenuItem[];
   onSubmit?: (message: string, attachments: Attachment[]) => void;
@@ -398,7 +522,7 @@ interface AIInputProps {
 }
 
 export function AIInput({
-  models = DEFAULT_MODELS,
+  models = aiModels,
   tools = DEFAULT_TOOLS,
   plusMenuItems = DEFAULT_PLUS_MENU,
   onSubmit,
@@ -410,7 +534,7 @@ export function AIInput({
   const [hasSubmitted, setHasSubmitted] = useState<boolean>(false);
   const [isListening, setIsListening] = useState<boolean>(false);
   const [selectedTool, setSelectedTool] = useState<ToolItem | null>(null);
-  const [selectedModel, setSelectedModel] = useState<Model>(models[0]);
+  const [selectedModel, setSelectedModel] = useState<AIModel>(aiModels[0]);
   const [uploadedFiles, setUplaodedFiles] = useState<UploadedFile[]>([]);
   const [activeDropdown, setActiveDropdown] = useState<
     "plus" | "tools" | "model" | null
@@ -483,6 +607,10 @@ export function AIInput({
       handleSubmit();
     }
   };
+
+  const chefs = [...new Set(models.map((model) => model.chef))];
+
+  const [open, setOpen] = useState(false);
 
   return (
     <LazyMotion features={domMax}>
@@ -609,7 +737,7 @@ export function AIInput({
 
                 <div className="flex items-center gap-2">
                   <div className="relative">
-                    <AIInputPillButton
+                    {/* <AIInputPillButton
                       layoutId="model-pill"
                       icon={selectedModel.icon}
                       isActive={activeDropdown === "model"}
@@ -622,8 +750,51 @@ export function AIInput({
                       <span className="text-sm font-medium">
                         {selectedModel.name}
                       </span>
-                    </AIInputPillButton>
-                    <AIInputDropdown
+                    </AIInputPillButton> */}
+                    <ModelSelector onOpenChange={setOpen} open={open}>
+                      <ModelSelectorTrigger asChild>
+                        <AIInputPillButton
+                          layoutId="model-pill"
+                          icon={Sparkle}
+                          isActive={activeDropdown === "model"}
+                          onClick={() =>
+                            setActiveDropdown(
+                              activeDropdown === "model" ? null : "model",
+                            )
+                          }
+                        >
+                          <span className="text-sm font-medium">
+                            {selectedModel.name}
+                          </span>
+                        </AIInputPillButton>
+                      </ModelSelectorTrigger>
+                      <ModelSelectorContent>
+                        <ModelSelectorInput placeholder="Search models..." />
+                        <ModelSelectorList>
+                          <ModelSelectorEmpty>
+                            No models found.
+                          </ModelSelectorEmpty>
+                          {chefs.map((chef) => (
+                            <ModelSelectorGroup heading={chef} key={chef}>
+                              {models
+                                .filter((model) => model.chef === chef)
+                                .map((model) => (
+                                  <ModelItem
+                                    key={model.id}
+                                    model={model}
+                                    onSelect={() => {
+                                      setSelectedModel(model);
+                                      setOpen(false);
+                                    }}
+                                    selectedModel={selectedModel}
+                                  />
+                                ))}
+                            </ModelSelectorGroup>
+                          ))}
+                        </ModelSelectorList>
+                      </ModelSelectorContent>
+                    </ModelSelector>
+                    {/* <AIInputDropdown
                       isOpen={activeDropdown === "model"}
                       onClose={() => setActiveDropdown(null)}
                       items={models}
@@ -649,7 +820,7 @@ export function AIInput({
                           )}
                         </button>
                       )}
-                    />
+                    /> */}
                   </div>
 
                   <div className="flex justify-end">
