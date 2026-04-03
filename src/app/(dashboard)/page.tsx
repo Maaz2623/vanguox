@@ -1,7 +1,8 @@
+import { ChatTemplate } from "@/features/dashboard/components/chat-template";
 import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
 
 const DashboardPage = () => {
-  return <div>Dashboard Page</div>;
+  return <ChatTemplate />;
 };
 
 export default DashboardPage;
